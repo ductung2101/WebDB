@@ -6,12 +6,14 @@ Make Django app run on localhost: Tutorial
 Work to be done:
   
   Figure out:
-    0. 
     
-    1. Data --> Model 
-        How to get data put into DB
+    1. Data 
+        How to get data put into DB --> all data in Django is created and managed in Model
+        How to create function to update DB (automatically): DB is on GitHub, use python to download CSV file and update.
         
-    2. HTML --> 
-        How to do visualization:
-          
-    3. 
+    2. HTML
+        Frontend: Create a view (use Tutorial + Templates from Django?)
+                  Develop a good view.
+        Backend:
+                  Use data in DB to display in view
+                  How to do visualization
