@@ -1,2 +1,5 @@
+.vscode/
 .idea/
+package-lock.json
 **/__pycache__/**
+**/*.code-workspace
