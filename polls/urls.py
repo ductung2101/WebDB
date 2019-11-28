@@ -7,4 +7,5 @@ urlpatterns = [
     path('sub', views.sub, name='sub'),
     path('line_chart', views.line_chart, name='line_chart'),
     path('line_chart_json', views.line_chart_json, name='line_chart_json'),
+    path('main_page', views.main_page, name='main_page'),
 ]
