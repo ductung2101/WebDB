@@ -33,4 +33,4 @@ class LineChartJSONView(BaseLineChartView):
 
 line_chart = TemplateView.as_view(template_name='line_chart.html')
 line_chart_json = LineChartJSONView.as_view()
-main_page = TeplateView.as_view(template_name='index.html')
+main_page = TemplateView.as_view(template_name='index.html')

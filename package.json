@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "./node_modules/.bin/webpack --config webpack.config.js",
-    "watch": "npm run start -- --watch"
+    "watch": "npm run start -- --watch",
+    "develop": "./node_modules/.bin/webpack --mode development --watch --config webpack.config.js"
   },
   "repository": {
     "type": "git",
@@ -20,9 +21,12 @@
   "dependencies": {
     "chart.js": "^2.9.3",
     "d3": "^5.14.2",
+    "expose-loader": "^0.7.5",
     "jquery": "^3.4.1"
   },
   "devDependencies": {
+    "css-loader": "^3.2.0",
+    "style-loader": "^1.0.1",
     "webpack": "^4.41.2",
     "webpack-bundle-tracker": "^0.4.3",
     "webpack-cli": "^3.3.10"
