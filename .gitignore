@@ -1,0 +1,7 @@
+.vscode/
+.idea/
+package-lock.json
+**/__pycache__/**
+**/*.code-workspace
+**/dist
+webpack-stats.json
