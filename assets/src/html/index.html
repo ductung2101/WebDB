@@ -4,7 +4,7 @@
 <html>
 <head>
 	<title></title>
-	{% render_bundle 'main' 'js' %}
+	{% render_bundle 'main' %}
 </head>
 <body>
 	<header>
@@ -13,19 +13,45 @@
 		<div class="container">
 			<div id="intro">
 				<div class="timestap-container">
-					<p class="timestap">UPDATED Nov. 24 2019 at 3:10 PM</p>
+					<p class="timestap" id="timestamp">
+					</p>
 				</div>
-				<h1>Dashborad</h1>
+				<h1>Dashboard</h1>
 				<h2>Placeholder</h2>
+				<h3>Here we should write some cool introduction.<h3>
 			</div>
 		</div>
 		<div class="container">
 			<div class="card">
-				<p>Text</p>	
+				<canvas id="myChart" width="500" height="400"></canvas>
+				<script type="text/javascript">
+					$.get('{% url "line_chart_json" %}', function(data) {
+						var ctx = $("#myChart").get(0).getContext("2d");
+						new Chart(ctx, {
+							type: 'line', data: data
+						});
+					});
+				</script>
 			</div><div class="card center">
-				<p>Text</p>	
+				<canvas id="myBarChart" width="500" height="400"></canvas>
+				<script type="text/javascript">
+					$.get('{% url "line_chart_json" %}', function(data) {
+						var ctx = $("#myBarChart").get(0).getContext("2d");
+						new Chart(ctx, {
+							type: 'bar', data: data
+						});
+					});
+				</script>
 			</div><div class="card">
-				<p>Text</p>
+				<canvas id="myRadarChart" width="500" height="400"></canvas>
+				<script type="text/javascript">
+					$.get('{% url "line_chart_json" %}', function(data) {
+						var ctx = $("#myRadarChart").get(0).getContext("2d");
+						new Chart(ctx, {
+							type: 'radar', data: data
+						});
+					});
+				</script>
 			</div>	
 		</div>
 		<table class="container">
@@ -63,4 +89,18 @@
 			</tbody>
 		</table>
 	</body>
+
+	{% comment %} script for timestamp processing {% endcomment %}
+	<script>
+		var currentDate = new Date().toLocaleDateString('de-DE', {  
+			day : 'numeric',
+			month : 'short',
+			year : 'numeric',
+			hour: '2-digit',
+			minute: '2-digit',
+		});
+		var ts = "Updated " + currentDate
+		document.getElementById("timestamp").innerHTML = ts
+		console.log(ts)
+	</script>
 </html>
