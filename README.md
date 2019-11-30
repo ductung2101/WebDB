@@ -15,6 +15,7 @@ This project is inspired by [Nate Silver's fivethirtyeight](fivethirtyeight.com)
 ```bash
 $ pip install django
 $ pip install django-chartjs
+$ pip install djangorestframework
 ```
 * Install npm, with your project manager, or from <https://www.npmjs.com/get-npm>
 
