@@ -59,7 +59,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'APP_DIRS': True,
-        'DIRS': [os.path.join(BASE_DIR, 'assets/src/html/')],
+        'DIRS': [os.path.join(BASE_DIR, 'assets', 'src', 'html')],
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -130,7 +130,7 @@ STATICFILES_DIRS = (
 # Configure webpack loader
 WEBPACK_LOADER = {
     'DEFAULT': {
-        'BUNDLE_DIR_NAME': 'dist/',
+        'BUNDLE_DIR_NAME': 'dist',
         'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json'),
     }
 }
