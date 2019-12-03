@@ -4,6 +4,7 @@ from django.utils import timezone
 # add to read CSV
 import csv
 import pandas as pd
+from django_pandas.managers import DataFrameManager
 
 
 class Question(models.Model):
@@ -27,17 +28,15 @@ class Choice(models.Model):
 
 
 def convertingdatetimefield(str):
-
     return datetime.datetime.strptime(str, '%m/%d/%y %H:%M')
 
 
 def convertDateField(str):
-
     return datetime.datetime.strptime(str, '%m/%d/%y')
 
 
 class Poll(models.Model):
-
+    pdobjects = DataFrameManager()
     question_id = models.CharField(max_length=200)
     poll_id = models.CharField(max_length=200)
     cycle = models.CharField(max_length=200)

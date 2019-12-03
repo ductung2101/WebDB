@@ -5,3 +5,4 @@ package-lock.json
 **/*.code-workspace
 **/dist
 webpack-stats.json
+ipynb/.ipynb_checkpoints/polls-checkpoint.ipynb
