@@ -13,9 +13,7 @@ This project is inspired by [Nate Silver's fivethirtyeight](fivethirtyeight.com)
 
 * Make sure you have all the Python prerequisites installed:
 ```bash
-$ pip install django
-$ pip install django-chartjs
-$ pip install djangorestframework
+pip install --user --requirement requirements.txt
 ```
 * Install npm, with your project manager, or from <https://www.npmjs.com/get-npm>
 
