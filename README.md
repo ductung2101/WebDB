@@ -13,9 +13,13 @@ This project is inspired by [Nate Silver's fivethirtyeight](fivethirtyeight.com)
 
 * Make sure you have all the Python prerequisites installed:
 ```bash
-pip install --user --requirement requirements.txt
+$ pip install --user --requirement requirements.txt
 ```
-* Install npm, with your project manager, or from <https://www.npmjs.com/get-npm>
+* Install npm, with your project manager, or from <https://www.npmjs.com/get-npm>. Then install
+the npm packages:
+```bash
+$ npm install
+```
 
 ### Running: 
 The project consists of a Django backend, and a node.js frontend. We will need to run 
