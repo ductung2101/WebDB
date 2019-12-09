@@ -2,20 +2,43 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.generic import TemplateView
 from chartjs.views.lines import BaseLineChartView
+from chartjs.views.lines import HighchartPlotLineChartView
 from random import randint
 from polls.models import Poll
 import datetime
 import numpy as np
 import pandas as pd
 
+
 # Create your views here.
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
+
 
 def sub(request):
     now = datetime.datetime.now()
     html = "<html><body>It is now %s.</body></html>" % now
     return HttpResponse(html)
+
+
+def corMatix(request):
+    df = pd.read_csv("polls\\simple_cor_data.csv")
+    df["polling_result"] = df["polling_result"].astype(float)
+    df["coverage"] = df["coverage"].astype(float)
+    colnames = df["candidate"].unique()
+    rownames = df["series"].unique()
+    cor_mat = pd.DataFrame(columns=colnames, index=rownames)
+    for col in colnames:
+        for row in rownames:
+            subset = df[df["candidate"] == col]
+            subset = subset[subset["series"] == row]
+
+            cor_mat.at[row, col] = np.corrcoef(subset["coverage"], subset["polling_result"])[0, 1]
+            if cor_mat.at[row, col] != cor_mat.at[row, col] or cor_mat.at[row, col] == 0 or cor_mat.at[
+                row, col] == -1 or cor_mat.at[row, col] == 1:
+                cor_mat.at[row, col] = "-"
+    return HttpResponse(cor_mat.to_html())
+
 
 class LineChartJSONView(BaseLineChartView):
     def get_labels(self):
@@ -33,22 +56,23 @@ class LineChartJSONView(BaseLineChartView):
                 [41, 92, 18, 3, 73, 87, 92],
                 [87, 21, 94, 0, 0, 13, 65]]
 
+
 class PollJSONView(BaseLineChartView):
-    def __init__(self, n_weeks = 10):
+    def __init__(self, n_weeks=10):
         qs = Poll.pdobjects.all()  # Use the Pandas Manager
         self.df = qs.to_dataframe()
         self.df["pct"] = self.df["pct"].astype(float)
-        self.df["create_date"] = pd.to_datetime(self.df["created_at"], 
-            infer_datetime_format = True)
-        self.df["create_week"] = (self.df['create_date'] - pd.to_timedelta(\
-            self.df['create_date'].dt.dayofweek, unit='d') + np.timedelta64(7, 'D'))\
+        self.df["create_date"] = pd.to_datetime(self.df["created_at"],
+                                                infer_datetime_format=True)
+        self.df["create_week"] = (self.df['create_date'] - pd.to_timedelta( \
+            self.df['create_date'].dt.dayofweek, unit='d') + np.timedelta64(7, 'D')) \
             .dt.normalize()
-        self.n_weeks = n_weeks 
+        self.n_weeks = n_weeks
         # TODO: insert better filtering here
         self.df_subset = self.df[self.df["party"] == "DEM"]
         self.df_pivot = self.df_subset.pivot_table(
-            values = "pct", index = "create_week", columns="candidate_name",
-            aggfunc = np.mean).fillna(0).iloc[-self.n_weeks:]
+            values="pct", index="create_week", columns="candidate_name",
+            aggfunc=np.mean).fillna(0).iloc[-self.n_weeks:]
         # import pdb; pdb.set_trace()
 
     def get_labels(self):
@@ -72,6 +96,7 @@ class PollJSONView(BaseLineChartView):
         for can in can_selected:
             lst_selected.append(list(self.df_pivot[can]))
         return lst_selected
+
 
 main_page = TemplateView.as_view(template_name='index.html')
 line_chart = TemplateView.as_view(template_name='line_chart.html')
