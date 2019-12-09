@@ -19,6 +19,7 @@ from django.shortcuts import redirect
 
 
 
+
 # Create your views here.
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
@@ -66,6 +67,7 @@ class CorrelationView(View):
                     cor_mat.at[row, col] = "-"
 
         return HttpResponse(cor_mat.to_html())
+
 
 class PollJSONView(BaseLineChartView):
     def post(self, request, *args, **kwargs):
