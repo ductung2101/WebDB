@@ -1,11 +1,13 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, FormView
 from chartjs.views.lines import BaseLineChartView
 from chartjs.views.lines import HighchartPlotLineChartView
 from random import randint
 from polls.models import Poll
+from polls.forms import DateForm
 import datetime
+import pytz
 import numpy as np
 import pandas as pd
 
@@ -56,9 +58,14 @@ class LineChartJSONView(BaseLineChartView):
                 [41, 92, 18, 3, 73, 87, 92],
                 [87, 21, 94, 0, 0, 13, 65]]
 
-
 class PollJSONView(BaseLineChartView):
-    def __init__(self, n_weeks=10):
+    def do_compute(self):
+        self.n_weeks = self.kwargs.get('n_weeks')
+        self.start_date = pytz.utc.localize(datetime.datetime.strptime(
+            self.kwargs.get('start_date'), "%Y-%m-%d"))
+        self.end_date = pytz.utc.localize(datetime.datetime.strptime(
+            self.kwargs.get('end_date'), "%Y-%m-%d"))
+
         qs = Poll.pdobjects.all()  # Use the Pandas Manager
         self.df = qs.to_dataframe()
         self.df["pct"] = self.df["pct"].astype(float)
@@ -67,15 +74,18 @@ class PollJSONView(BaseLineChartView):
         self.df["create_week"] = (self.df['create_date'] - pd.to_timedelta( \
             self.df['create_date'].dt.dayofweek, unit='d') + np.timedelta64(7, 'D')) \
             .dt.normalize()
-        self.n_weeks = n_weeks
         # TODO: insert better filtering here
         self.df_subset = self.df[self.df["party"] == "DEM"]
         self.df_pivot = self.df_subset.pivot_table(
             values="pct", index="create_week", columns="candidate_name",
-            aggfunc=np.mean).fillna(0).iloc[-self.n_weeks:]
+            aggfunc=np.mean).fillna(0)#.iloc[-self.n_weeks:]
+        self.df_pivot = self.df_pivot[
+            (self.df_pivot.index <= self.end_date) & 
+            (self.df_pivot.index >= self.start_date)]
         # import pdb; pdb.set_trace()
 
     def get_labels(self):
+        self.do_compute()
         """Return n_weeks labels for the x-axis."""
         return list(self.df_pivot.index.strftime("%d.%m.%Y"))
 
@@ -97,8 +107,8 @@ class PollJSONView(BaseLineChartView):
             lst_selected.append(list(self.df_pivot[can]))
         return lst_selected
 
-
-main_page = TemplateView.as_view(template_name='index.html')
+main_page = FormView.as_view(template_name='index.html', 
+    form_class = DateForm)
 line_chart = TemplateView.as_view(template_name='line_chart.html')
 
 line_chart_json = LineChartJSONView.as_view()

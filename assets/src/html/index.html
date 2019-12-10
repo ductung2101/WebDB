@@ -33,15 +33,11 @@
 					});
 				</script>
 			</div><div class="card center">
-				<canvas id="myBarChart" width="500" height="400"></canvas>
-				<script type="text/javascript">
-					$.get('{% url "line_chart_json" %}', function(data) {
-						var ctx = $("#myBarChart").get(0).getContext("2d");
-						new Chart(ctx, {
-							type: 'bar', data: data
-						});
-					});
-				</script>
+				<form action = "" method="post">
+					{% csrf_token %}
+					{{ form }}
+					<input type="submit" value="Submit">
+				</form>
 			</div><div class="card">
 				<canvas id="myRadarChart" width="500" height="400"></canvas>
 				<script type="text/javascript">
@@ -91,7 +87,11 @@
 		<div class="container">
 			<canvas id="myBigChart" width="768" height="400"></canvas>
 			<script type="text/javascript">
-				$.get('{% url "poll_json" %}', function(data) {
+				var start_date = "{{form.start_date.value}}"
+				var end_date = "{{form.end_date.value}}"
+				console.log(start_date)
+				console.log(start_date.type)
+				$.get('{% url "poll_json" form.fields.start_date.initial form.fields.end_date.initial %}', function(data) {
 					var ctx = $("#myBigChart").get(0).getContext("2d");
 					new Chart(ctx, {
 						type: 'line', data: data
