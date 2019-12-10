@@ -87,16 +87,19 @@
 		<div class="container">
 			<canvas id="myBigChart" width="768" height="400"></canvas>
 			<script type="text/javascript">
-				var start_date = "{{form.start_date.value}}"
 				var end_date = "{{form.end_date.value}}"
-				console.log(start_date)
-				console.log(start_date.type)
-				$.get('{% url "poll_json" form.fields.start_date.initial form.fields.end_date.initial %}', function(data) {
+				console.log(end_date)
+				console.log(end_date.type)
+				{% with sd=form.start_date.value %}
+				{% with ed=form.end_date.value %}
+				$.get('{% url "poll_json" sd ed %}', function(data) {
 					var ctx = $("#myBigChart").get(0).getContext("2d");
 					new Chart(ctx, {
 						type: 'line', data: data
 					});
 				});
+				{%endwith%}
+				{%endwith%}
 			</script>
 		</div>	
 	</body>
