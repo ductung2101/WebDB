@@ -23,8 +23,14 @@ def sub(request):
     return HttpResponse(html)
 
 
-def corMatix(request):
-    df = pd.read_csv("polls\\simple_cor_data.csv")
+def correlation_matix(request, start_date = None, end_date = None):
+    df = pd.read_csv("polls\\simple_cor_data.csv", parse_dates=[['month', 'year']])
+    df['month_year'] = pd.to_datetime(df['month_year'])
+    if start_date is not None and end_date is not None:
+        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
+        mask = (df['month_year'] > start_date) & (df['month_year'] <= end_date)
+        df = df.loc[mask]
     df["polling_result"] = df["polling_result"].astype(float)
     df["coverage"] = df["coverage"].astype(float)
     colnames = df["candidate"].unique()
@@ -39,6 +45,7 @@ def corMatix(request):
             if cor_mat.at[row, col] != cor_mat.at[row, col] or cor_mat.at[row, col] == 0 or cor_mat.at[
                 row, col] == -1 or cor_mat.at[row, col] == 1:
                 cor_mat.at[row, col] = "-"
+
     return HttpResponse(cor_mat.to_html())
 
 

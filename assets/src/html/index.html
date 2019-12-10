@@ -50,40 +50,11 @@
 				</script>
 			</div>	
 		</div>
-		<table class="container">
-			<thead>
-				<tr>
-					<th>Col1</th>
-					<th>Col2</th>
-					<th>Col3</th>
-					<th>Col4</th>
-					<th>Col5</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr>
-					<td>Data</td>
-					<td>Data</td>
-					<td>Data</td>
-					<td>Data</td>
-					<td>Data</td>
-				</tr>
-				<tr>
-					<td>Data</td>
-					<td>Data</td>
-					<td>Data</td>
-					<td>Data</td>
-					<td>Data</td>
-				</tr>
-				<tr>
-					<td>Data</td>
-					<td>Data</td>
-					<td>Data</td>
-					<td>Data</td>
-					<td>Data</td>
-				</tr>
-			</tbody>
+		<table class="container" id="corr_data">
+			<script type="text/javascript">$.ajax({ url: '{% url "correlation_matrix" %}', success: function(data) {
+			document.getElementById('corr_data').innerHTML = (data); } });</script>
 		</table>
+
 		<div class="container">
 			<canvas id="myBigChart" width="768" height="400"></canvas>
 			<script type="text/javascript">
