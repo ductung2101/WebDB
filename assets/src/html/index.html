@@ -7,6 +7,8 @@
 	{% render_bundle 'main' %}
 </head>
 <body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
 	<header>
 		<div id="title">Web DB App</div>
 	</header>
@@ -18,7 +20,7 @@
 				</div>
 				<h1>Dashboard</h1>
 				<h2>Placeholder</h2>
-				<h3>Here we should write some cool introduction.<h3>
+				<h3>Here we should write some cool introduction.</h3>
 			</div>
 		</div>
 		<div class="container">
@@ -36,7 +38,7 @@
 				<form action = "" method="post">
 					{% csrf_token %}
 					{{ form }}
-					<input type="submit" value="Submit">
+					<input form method="post" id="submit_change_date" type="submit" value="Submit" onclick="onSubmitChange()">
 				</form>
 			</div><div class="card">
 				<canvas id="myRadarChart" width="500" height="400"></canvas>
@@ -48,7 +50,7 @@
 						});
 					});
 				</script>
-			</div>	
+			</div>
 		</div>
 		<table class="container">
 			<thead>
@@ -89,8 +91,6 @@
 			<script type="text/javascript">
 				var start_date = "{{form.start_date.value}}"
 				var end_date = "{{form.end_date.value}}"
-				console.log(start_date)
-				console.log(start_date.type)
 				$.get('{% url "poll_json" form.fields.start_date.initial form.fields.end_date.initial %}', function(data) {
 					var ctx = $("#myBigChart").get(0).getContext("2d");
 					new Chart(ctx, {
@@ -98,12 +98,12 @@
 					});
 				});
 			</script>
-		</div>	
+		</div>
 	</body>
 
 	{% comment %} script for timestamp processing {% endcomment %}
 	<script>
-		var currentDate = new Date().toLocaleDateString('de-DE', {  
+		var currentDate = new Date().toLocaleDateString('de-DE', {
 			day : 'numeric',
 			month : 'short',
 			year : 'numeric',
@@ -113,5 +113,33 @@
 		var ts = "Updated " + currentDate
 		document.getElementById("timestamp").innerHTML = ts
 		console.log(ts)
+	</script>
+
+
+	<script type="text/javascript">
+	//add all other JS functions here
+	//event listener for clicking submit button
+	function onSubmitChange() {
+		var start_date_value = $('#id_start_date').val()
+		var end_date_value = $('#id_end_date').val()
+		$.ajax({
+			type:"POST",
+			url: '{% url "poll_json_post"%}',
+			data: {'start_date': $('#id_start_date').val(),
+			    'end_date': $('#id_end_date').val(),
+			    'csrfmiddlewaretoken': '{{ csrf_token }}',
+				   },
+			success: function(data) {
+				var ctx = $("#myBigChart").get(0).getContext("2d");
+				new Chart(ctx, {
+					type: 'line', data: data
+				});
+			},
+		});
+
+    };
+
+
+
 	</script>
 </html>
