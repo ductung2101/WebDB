@@ -10,6 +10,7 @@ import datetime
 import pytz
 import numpy as np
 import pandas as pd
+import os
 
 
 # Create your views here.
@@ -24,7 +25,7 @@ def sub(request):
 
 
 def correlation_matix(request, start_date = None, end_date = None):
-    df = pd.read_csv("polls\\simple_cor_data.csv", parse_dates=[['month', 'year']])
+    df = pd.read_csv(os.path.join("polls", "simple_cor_data.csv"), parse_dates=[['month', 'year']])
     df['month_year'] = pd.to_datetime(df['month_year'])
     if start_date is not None and end_date is not None:
         start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
