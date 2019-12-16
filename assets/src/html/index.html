@@ -7,8 +7,6 @@
 	{% render_bundle 'main' %}
 </head>
 <body>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-<script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
 	<header>
 		<div id="title">Web DB App</div>
 	</header>
@@ -53,14 +51,10 @@
 			</div>
 		</div>
 		<table class="container" id="corr_data">
-				{% with sd=form.start_date.value %}
-				{% with ed=form.end_date.value %}
-			<script type="text/javascript">$.ajax({ url: '{% url "correlation_matrix" sd ed %}', 
+			<script type="text/javascript">$.ajax({ url: '{% url "correlation_matrix" form.fields.start_date.initial form.fields.end_date.initial %}', 
 				success: function(data) {
 				document.getElementById('corr_data').innerHTML = (data); } });
 			</script>
-			{% endwith %}
-			{% endwith %}
 		</table>
 
 		<div class="container">
@@ -97,9 +91,11 @@
 	function onSubmitChange() {
 		var start_date_value = $('#id_start_date').val()
 		var end_date_value = $('#id_end_date').val()
+
+		// this updates the graph
 		$.ajax({
 			type:"POST",
-			url: '{% url "poll_json_post"%}',
+			url: '{% url "poll_json_post" %}',
 			data: {'start_date': $('#id_start_date').val(),
 			    'end_date': $('#id_end_date').val(),
 			    'csrfmiddlewaretoken': '{{ csrf_token }}',
@@ -109,6 +105,19 @@
 				new Chart(ctx, {
 					type: 'line', data: data
 				});
+			},
+		});
+
+		// this updates the correlation matrix
+		$.ajax({
+			type:"POST",
+			url: '{% url "correlation_matrix_post" %}',
+			data: {'start_date': $('#id_start_date').val(),
+			    'end_date': $('#id_end_date').val(),
+			    'csrfmiddlewaretoken': '{{ csrf_token }}',
+				   },
+			success: function(data) {
+				document.getElementById('corr_data').innerHTML = (data); 
 			},
 		});
 

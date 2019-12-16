@@ -28,6 +28,12 @@ def sub(request):
     return HttpResponse(html)
 
 
+def correlation_matrix_post(request, *args, **kwargs):
+    form = DateForm(request.POST)
+    if form.is_valid():
+        print('yes done')
+    return redirect('correlation_matrix', start_date = form['start_date'].value(), end_date = form['end_date'].value())
+
 def correlation_matix(request, start_date = None, end_date = None):
     df = pd.read_csv(os.path.join("polls", "corr_data.csv"))
     df['Date'] = pd.to_datetime(df['Date'])
