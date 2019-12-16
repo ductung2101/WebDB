@@ -6,4 +6,4 @@ package-lock.json
 **/dist
 webpack-stats.json
 ipynb/.ipynb_checkpoints/polls-checkpoint.ipynb
-node_modules/**
+node_modules/
