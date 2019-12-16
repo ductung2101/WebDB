@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView, FormView
 from chartjs.views.lines import BaseLineChartView
 from chartjs.views.lines import HighchartPlotLineChartView
@@ -11,6 +12,9 @@ import pytz
 import numpy as np
 import pandas as pd
 import os
+from django import forms
+from django.views.decorators.csrf import csrf_protect
+from django.shortcuts import redirect
 
 
 # Create your views here.
@@ -67,13 +71,31 @@ class LineChartJSONView(BaseLineChartView):
                 [87, 21, 94, 0, 0, 13, 65]]
 
 class PollJSONView(BaseLineChartView):
+
+    def post(self, request, *args, **kwargs):
+        form = DateForm(request.POST)
+        if form.is_valid():
+            print('yes done')
+        import pdb
+        #pdb.set_trace()
+        return redirect('poll_json', start_date = form['start_date'].value(),
+                                    end_date = form['end_date'].value())
+
     def do_compute(self):
+
+        #self.new_start_date = forms.CharField(label='Start Date', max_length=100, initial="2019-01-01")
         self.n_weeks = self.kwargs.get('n_weeks')
+
+
+
         self.start_date = pytz.utc.localize(datetime.datetime.strptime(
             self.kwargs.get('start_date'), "%Y-%m-%d"))
+        #self.start_date = pytz.utc.localize(datetime.datetime.strptime(
+         #  self.new_start_date.initial, "%Y-%m-%d"))
         self.end_date = pytz.utc.localize(datetime.datetime.strptime(
             self.kwargs.get('end_date'), "%Y-%m-%d"))
 
+        #print('works', self.start_date, self.end_date)
         qs = Poll.pdobjects.all()  # Use the Pandas Manager
         self.df = qs.to_dataframe()
         self.df["pct"] = self.df["pct"].astype(float)
@@ -116,8 +138,7 @@ class PollJSONView(BaseLineChartView):
         return lst_selected
 
 main_page = FormView.as_view(template_name='index.html', 
-    form_class = DateForm)
+    form_class = DateForm, success_url=u'')
 line_chart = TemplateView.as_view(template_name='line_chart.html')
-
 line_chart_json = LineChartJSONView.as_view()
 poll_json = PollJSONView.as_view()

@@ -5,6 +5,9 @@ from django.utils import timezone
 import csv
 import pandas as pd
 from django_pandas.managers import DataFrameManager
+import requests
+from requests.auth import HTTPDigestAuth
+import json
 
 
 class Question(models.Model):
@@ -70,6 +73,14 @@ class Poll(models.Model):
     candidate_id = models.CharField(max_length=200)
     candidate_name = models.CharField(max_length=200)
     pct = models.FloatField()
+
+
+class Media(models.Model):
+    url = 'https://api.gdeltproject.org/api/v2/tv/tv?query=trump%20market:%22National%22&mode=timelinevol&format=json&datanorm=perc&timelinesmooth=0&datacomb=sep&last24=yes&timezoom=yes'
+    response = requests.get(url).json()
+    #data = json.load(response)
+    #print(data["timeline"])
+
 
 '''
 #comment to disable loading data, uncomment to update data manually
