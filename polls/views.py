@@ -22,24 +22,24 @@ def sub(request):
 
 
 def correlation_matix(request, start_date = None, end_date = None):
-    df = pd.read_csv("polls\\simple_cor_data.csv", parse_dates=[['month', 'year']])
-    df['month_year'] = pd.to_datetime(df['month_year'])
+    df = pd.read_csv("polls\\corr_data.csv")
+    df['Date'] = pd.to_datetime(df['Date'])
     if start_date is not None and end_date is not None:
         start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
         end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
-        mask = (df['month_year'] > start_date) & (df['month_year'] <= end_date)
+        mask = (df['Date'] > start_date) & (df['Date'] <= end_date)
         df = df.loc[mask]
-    df["polling_result"] = df["polling_result"].astype(float)
-    df["coverage"] = df["coverage"].astype(float)
-    colnames = df["candidate"].unique()
-    rownames = df["series"].unique()
+    df["pct"] = df["pct"].astype(float)
+    df["Value"] = df["Value"].astype(float)
+    colnames = df["Candidate"].unique()
+    rownames = df["Series"].unique()
     cor_mat = pd.DataFrame(columns=colnames, index=rownames)
     for col in colnames:
         for row in rownames:
-            subset = df[df["candidate"] == col]
-            subset = subset[subset["series"] == row]
+            subset = df[df["Candidate"] == col]
+            subset = subset[subset["Series"] == row]
 
-            cor_mat.at[row, col] = np.corrcoef(subset["coverage"], subset["polling_result"])[0, 1]
+            cor_mat.at[row, col] = np.corrcoef(subset["Value"], subset["pct"])[0, 1]
             if cor_mat.at[row, col] != cor_mat.at[row, col] or cor_mat.at[row, col] == 0 or cor_mat.at[
                 row, col] == -1 or cor_mat.at[row, col] == 1:
                 cor_mat.at[row, col] = "-"
