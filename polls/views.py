@@ -25,7 +25,7 @@ def sub(request):
 
 
 def correlation_matix(request, start_date = None, end_date = None):
-    df = pd.read_csv(os.path.join("polls", "corr_data.csv")
+    df = pd.read_csv(os.path.join("polls", "corr_data.csv"))
     df['Date'] = pd.to_datetime(df['Date'])
     if start_date is not None and end_date is not None:
         start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')

@@ -53,8 +53,9 @@
 		<table class="container" id="corr_data">
 				{% with sd=form.start_date.value %}
 				{% with ed=form.end_date.value %}
-			<script type="text/javascript">$.ajax({ url: '{% url "correlation_matrix" sd ed %}', success: function(data) {
-			document.getElementById('corr_data').innerHTML = (data); } });
+			<script type="text/javascript">$.ajax({ url: '{% url "correlation_matrix" sd ed %}', 
+				success: function(data) {
+				document.getElementById('corr_data').innerHTML = (data); } });
 			</script>
 			{% endwith %}
 			{% endwith %}
