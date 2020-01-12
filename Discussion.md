@@ -26,3 +26,10 @@ Work to be done:
   * The updating code is written, but it needs to be automated:
     * pull data from github
     * compare and add to local database.
+
+12.01.2020:
+  Some more thoughts and todos:
+  * The graph is being generated and overwritten, but the old one does not disappear and remains underneath, on the web page. This generates weird behavior when hovering the mouse over it. We need to fix this.
+  * The form has to look better, and be validated, etc.
+  * The correlation numbers have to be meaningful. Ideally we can also select which candidates we include and which not.
+  * Go back to the ideas for plots and all those things that we had and start implementing them, one by one.

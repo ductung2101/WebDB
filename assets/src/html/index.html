@@ -22,32 +22,12 @@
 			</div>
 		</div>
 		<div class="container">
-			<div class="card">
-				<canvas id="myChart" width="500" height="400"></canvas>
-				<script type="text/javascript">
-					$.get('{% url "line_chart_json" %}', function(data) {
-						var ctx = $("#myChart").get(0).getContext("2d");
-						new Chart(ctx, {
-							type: 'line', data: data
-						});
-					});
-				</script>
-			</div><div class="card center">
+			<div class="card center">
 				<form action = "" method="post">
 					{% csrf_token %}
 					{{ form }}
 					<input form method="post" id="submit_change_date" type="submit" value="Submit" onclick="onSubmitChange()">
 				</form>
-			</div><div class="card">
-				<canvas id="myRadarChart" width="500" height="400"></canvas>
-				<script type="text/javascript">
-					$.get('{% url "line_chart_json" %}', function(data) {
-						var ctx = $("#myRadarChart").get(0).getContext("2d");
-						new Chart(ctx, {
-							type: 'radar', data: data
-						});
-					});
-				</script>
 			</div>
 		</div>
 		<table class="container" id="corr_data">
