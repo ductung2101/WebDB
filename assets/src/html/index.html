@@ -31,7 +31,7 @@
 			</div>
 		</div>
 		<table class="container" id="corr_data">
-			<script type="text/javascript">$.ajax({ url: '{% url "correlation_matrix" form.fields.start_date.initial form.fields.end_date.initial %}', 
+			<script type="text/javascript">$.ajax({ url: '{% url "correlation_view" form.fields.start_date.initial form.fields.end_date.initial %}', 
 				success: function(data) {
 				document.getElementById('corr_data').innerHTML = (data); } });
 			</script>
@@ -40,9 +40,10 @@
 		<div class="container">
 			<canvas id="myBigChart" width="768" height="400"></canvas>
 			<script type="text/javascript">
-				$.get('{% url "poll_json" form.fields.start_date.initial form.fields.end_date.initial %}', function(data) {
+				$.get('{% url "poll_json" form.fields.start_date.initial form.fields.end_date.initial %}', 
+				function(data) {
 					var ctx = $("#myBigChart").get(0).getContext("2d");
-					new Chart(ctx, {
+					bigChart = new Chart(ctx, {
 						type: 'line', data: data
 					});
 				});
@@ -81,17 +82,15 @@
 			    'csrfmiddlewaretoken': '{{ csrf_token }}',
 				   },
 			success: function(data) {
-				var ctx = $("#myBigChart").get(0).getContext("2d");
-				new Chart(ctx, {
-					type: 'line', data: data
-				});
+				bigChart.data = data;
+				bigChart.update()
 			},
 		});
 
 		// this updates the correlation matrix
 		$.ajax({
 			type:"POST",
-			url: '{% url "correlation_matrix_post" %}',
+			url: '{% url "correlation_view_post" %}',
 			data: {'start_date': $('#id_start_date').val(),
 			    'end_date': $('#id_end_date').val(),
 			    'csrfmiddlewaretoken': '{{ csrf_token }}',

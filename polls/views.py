@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
+from django.views import View
 from django.views.generic import TemplateView, FormView
 from chartjs.views.lines import BaseLineChartView
 from chartjs.views.lines import HighchartPlotLineChartView
@@ -28,80 +29,53 @@ def sub(request):
     return HttpResponse(html)
 
 
-def correlation_matrix_post(request, *args, **kwargs):
-    form = DateForm(request.POST)
-    if form.is_valid():
-        print('yes done')
-    return redirect('correlation_matrix', start_date = form['start_date'].value(), end_date = form['end_date'].value())
-
-def correlation_matix(request, start_date = None, end_date = None):
-    df = pd.read_csv(os.path.join("polls", "corr_data.csv"))
-    df['Date'] = pd.to_datetime(df['Date'])
-    if start_date is not None and end_date is not None:
-        start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
-        end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
-        mask = (df['Date'] > start_date) & (df['Date'] <= end_date)
-        df = df.loc[mask]
-    df["pct"] = df["pct"].astype(float)
-    df["Value"] = df["Value"].astype(float)
-    colnames = df["Candidate"].unique()
-    rownames = df["Series"].unique()
-    cor_mat = pd.DataFrame(columns=colnames, index=rownames)
-    for col in colnames:
-        for row in rownames:
-            subset = df[df["Candidate"] == col]
-            subset = subset[subset["Series"] == row]
-
-            cor_mat.at[row, col] = np.corrcoef(subset["Value"], subset["pct"])[0, 1]
-            if cor_mat.at[row, col] != cor_mat.at[row, col] or cor_mat.at[row, col] == 0 or cor_mat.at[
-                row, col] == -1 or cor_mat.at[row, col] == 1:
-                cor_mat.at[row, col] = "-"
-
-    return HttpResponse(cor_mat.to_html())
-
-
-class LineChartJSONView(BaseLineChartView):
-    def get_labels(self):
-        """Return 7 labels for the x-axis."""
-        return ["January", "February", "March", "April", "May", "June", "July"]
-
-    def get_providers(self):
-        """Return names of datasets."""
-        return ["Central", "Eastside", "Westside"]
-
-    def get_data(self):
-        """Return 3 datasets to plot."""
-
-        return [[75, 44, 92, 11, 44, 95, 35],
-                [41, 92, 18, 3, 73, 87, 92],
-                [87, 21, 94, 0, 0, 13, 65]]
-
-class PollJSONView(BaseLineChartView):
-
+class CorrelationView(View):
     def post(self, request, *args, **kwargs):
         form = DateForm(request.POST)
         if form.is_valid():
             print('yes done')
-        import pdb
-        #pdb.set_trace()
+        return redirect('correlation_view', start_date = form['start_date'].value(), end_date = form['end_date'].value())
+
+    def get(self, request, start_date = None, end_date = None):
+        df = pd.read_csv(os.path.join("polls", "corr_data.csv"))
+        df['Date'] = pd.to_datetime(df['Date'])
+        if start_date is not None and end_date is not None:
+            start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
+            end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
+            mask = (df['Date'] > start_date) & (df['Date'] <= end_date)
+            df = df.loc[mask]
+        df["pct"] = df["pct"].astype(float)
+        df["Value"] = df["Value"].astype(float)
+        colnames = df["Candidate"].unique()
+        rownames = df["Series"].unique()
+        cor_mat = pd.DataFrame(columns=colnames, index=rownames)
+        for col in colnames:
+            for row in rownames:
+                subset = df[df["Candidate"] == col]
+                subset = subset[subset["Series"] == row]
+
+                cor_mat.at[row, col] = np.corrcoef(subset["Value"], subset["pct"])[0, 1]
+                if cor_mat.at[row, col] != cor_mat.at[row, col] or cor_mat.at[row, col] == 0 or cor_mat.at[
+                    row, col] == -1 or cor_mat.at[row, col] == 1:
+                    cor_mat.at[row, col] = "-"
+
+        return HttpResponse(cor_mat.to_html())
+
+class PollJSONView(BaseLineChartView):
+    def post(self, request, *args, **kwargs):
+        form = DateForm(request.POST)
+        # import pdb
+        # pdb.set_trace()
         return redirect('poll_json', start_date = form['start_date'].value(),
                                     end_date = form['end_date'].value())
 
     def do_compute(self):
-
-        #self.new_start_date = forms.CharField(label='Start Date', max_length=100, initial="2019-01-01")
         self.n_weeks = self.kwargs.get('n_weeks')
-
-
-
         self.start_date = pytz.utc.localize(datetime.datetime.strptime(
             self.kwargs.get('start_date'), "%Y-%m-%d"))
-        #self.start_date = pytz.utc.localize(datetime.datetime.strptime(
-         #  self.new_start_date.initial, "%Y-%m-%d"))
         self.end_date = pytz.utc.localize(datetime.datetime.strptime(
             self.kwargs.get('end_date'), "%Y-%m-%d"))
 
-        #print('works', self.start_date, self.end_date)
         qs = Poll.pdobjects.all()  # Use the Pandas Manager
         self.df = qs.to_dataframe()
         self.df["pct"] = self.df["pct"].astype(float)
@@ -145,6 +119,5 @@ class PollJSONView(BaseLineChartView):
 
 main_page = FormView.as_view(template_name='index.html', 
     form_class = DateForm, success_url=u'')
-line_chart = TemplateView.as_view(template_name='line_chart.html')
-line_chart_json = LineChartJSONView.as_view()
-poll_json = PollJSONView.as_view()
+poll_json_view = PollJSONView.as_view()
+correlation_view = CorrelationView.as_view()
