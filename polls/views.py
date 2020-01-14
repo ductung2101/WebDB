@@ -6,7 +6,7 @@ from django.views.generic import TemplateView, FormView
 from chartjs.views.lines import BaseLineChartView
 from chartjs.views.lines import HighchartPlotLineChartView
 from random import randint
-from polls.models import Poll
+from polls.models import Poll, Media
 from polls.forms import DateForm
 import datetime
 import pytz
@@ -16,6 +16,7 @@ import os
 from django import forms
 from django.views.decorators.csrf import csrf_protect
 from django.shortcuts import redirect
+
 
 
 # Create your views here.
@@ -37,24 +38,29 @@ class CorrelationView(View):
         return redirect('correlation_view', start_date = form['start_date'].value(), end_date = form['end_date'].value())
 
     def get(self, request, start_date = None, end_date = None):
-        df = pd.read_csv(os.path.join("polls", "corr_data.csv"))
-        df['Date'] = pd.to_datetime(df['Date'])
+        #try to replace df with model.Media
+        qs = Media.pdobjects.all()
+        df = qs.to_dataframe()
+
+        print("qs", qs[0])
         if start_date is not None and end_date is not None:
-            start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
-            end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
-            mask = (df['Date'] > start_date) & (df['Date'] <= end_date)
+            #change type of start_date to be same type with Media.date
+            start_date_new = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date_new = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
+            mask = (df['date'] > start_date_new) & (df['date'] <= end_date_new)
             df = df.loc[mask]
         df["pct"] = df["pct"].astype(float)
-        df["Value"] = df["Value"].astype(float)
-        colnames = df["Candidate"].unique()
-        rownames = df["Series"].unique()
+        df["value"] = df["value"].astype(float)
+        #import pdb; pdb.set_trace()
+        colnames = df["candidate"].unique()
+        rownames = df["series"].unique()
         cor_mat = pd.DataFrame(columns=colnames, index=rownames)
         for col in colnames:
             for row in rownames:
-                subset = df[df["Candidate"] == col]
-                subset = subset[subset["Series"] == row]
+                subset = df[df["candidate"] == col]
+                subset = subset[subset["series"] == row]
 
-                cor_mat.at[row, col] = np.corrcoef(subset["Value"], subset["pct"])[0, 1]
+                cor_mat.at[row, col] = np.corrcoef(subset["value"], subset["pct"])[0, 1]
                 if cor_mat.at[row, col] != cor_mat.at[row, col] or cor_mat.at[row, col] == 0 or cor_mat.at[
                     row, col] == -1 or cor_mat.at[row, col] == 1:
                     cor_mat.at[row, col] = "-"
@@ -64,8 +70,6 @@ class CorrelationView(View):
 class PollJSONView(BaseLineChartView):
     def post(self, request, *args, **kwargs):
         form = DateForm(request.POST)
-        # import pdb
-        # pdb.set_trace()
         return redirect('poll_json', start_date = form['start_date'].value(),
                                     end_date = form['end_date'].value())
 

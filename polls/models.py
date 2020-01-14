@@ -80,6 +80,7 @@ class Poll(models.Model):
 
 
 class Media(models.Model):
+    pdobjects = DataFrameManager()
     url = 'https://api.gdeltproject.org/api/v2/tv/tv?query=trump%20market:%22National%22&mode=timelinevol&format=json&datanorm=perc&timelinesmooth=0&datacomb=sep&last24=yes&timezoom=yes'
     response = requests.get(url).json()
     #data = json.load(response)
