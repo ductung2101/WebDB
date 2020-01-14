@@ -1,4 +1,4 @@
-,answer,create_week,pct,Date,Series,Value,Candidate
+id,answer,create_week,pct,Date,Series,Value,Candidate
 0,Bennet,2019-02-25 00:00:00,0.0,2019-02-24 00:00:00,BLOOMBERG,0.0,Bennet
 1,Bennet,2019-02-25 00:00:00,0.0,2019-02-24 00:00:00,CNBC,0.0,Bennet
 2,Bennet,2019-02-25 00:00:00,0.0,2019-02-24 00:00:00,CNN,0.0115,Bennet

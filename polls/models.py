@@ -1,7 +1,6 @@
 import datetime
 from django.db import models
 from django.utils import timezone
-# add to read CSV
 import csv
 import pandas as pd
 from django_pandas.managers import DataFrameManager
@@ -35,8 +34,13 @@ def convertingdatetimefield(str):
 
 
 def convertDateField(str):
-    return datetime.datetime.strptime(str, '%m/%d/%y')
-
+    #in poll data
+    if "/" in str:
+        return datetime.datetime.strptime(str, '%m/%d/%y')
+    #in media data
+    if "-" in str:
+        temp = str[0:10]
+        return datetime.datetime.strptime(temp, '%Y-%m-%d')
 
 class Poll(models.Model):
     pdobjects = DataFrameManager()
@@ -80,10 +84,38 @@ class Media(models.Model):
     response = requests.get(url).json()
     #data = json.load(response)
     #print(data["timeline"])
+    media_id = models.IntegerField()
+    answer = models.CharField(max_length=200)
+    create_week = models.DateField()
+    pct = models.FloatField()
+    date = models.DateField()
+    series = models.CharField(max_length=200)
+    value = models.FloatField()
+    candidate = models.CharField(max_length=200)
 
+'''file_path = "C:\\Users\\ndtun\\PycharmProjects\\WebDB\\WebDBSite\\polls\\corr_data.csv"
+temp = pd.read_csv(file_path, sep=',', quotechar='"')
+with open(file_path, 'r') as csv_file:
+    reader = csv.reader(csv_file, delimiter=',', quotechar='"')
+    header = next(reader)
+    print(header)
+    i=0
+    for row in reader:
+        i+=1
+        print(i)
+        if row[0] != "id":
+            created = Media.objects.get_or_create(
+                media_id=row[0],
+                answer=row[1],
+                create_week=convertDateField(row[2]),
+                pct=row[3],
+                date=convertDateField(row[4]),
+                series=row[5],
+                value=row[6],
+                candidate=row[7],
+                )
 
-'''
-#comment to disable loading data, uncomment to update data manually
+comment to disable loading data, uncomment to update data manually
 file_path = "C:\\Users\\ndtun\\PycharmProjects\\WebDB\\WebDBSite\\president_primary_polls.csv"
 temp = pd.read_csv(file_path, sep=',', quotechar='"')
 with open(file_path, 'r') as csv_file:
