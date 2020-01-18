@@ -159,7 +159,7 @@ class MainPageView(FormView):
 
         fig = go.Figure(data=hm)
 
-        plot_div = plot(fig, output_type='div', include_plotlyjs=False)
+        plot_div = plot(fig, output_type='div', include_plotlyjs=True)
         context = super().get_context_data(**kwargs)
         context['heatmap'] = plot_div
         return render(request, 'index.html', context)
