@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 	<title></title>
 	{% render_bundle 'main' %}
 </head>
@@ -18,7 +19,7 @@
 				</div>
 				<h1>Dashboard</h1>
 				<h2>Placeholder</h2>
-				<h3>Here we should write some cool introduction.<h3>
+				<h3>Here we should write some cool introduction.</h3>
 			</div>
 		</div>
 		<div class="container">
@@ -33,15 +34,11 @@
 					});
 				</script>
 			</div><div class="card center">
-				<canvas id="myBarChart" width="500" height="400"></canvas>
-				<script type="text/javascript">
-					$.get('{% url "line_chart_json" %}', function(data) {
-						var ctx = $("#myBarChart").get(0).getContext("2d");
-						new Chart(ctx, {
-							type: 'bar', data: data
-						});
-					});
-				</script>
+				<form action = "" method="post">
+					{% csrf_token %}
+					{{ form }}
+					<input form method="post" id="submit_change_date" type="submit" value="Submit" onclick="onSubmitChange()">
+				</form>
 			</div><div class="card">
 				<canvas id="myRadarChart" width="500" height="400"></canvas>
 				<script type="text/javascript">
@@ -52,58 +49,34 @@
 						});
 					});
 				</script>
-			</div>	
+			</div>
 		</div>
-		<table class="container">
-			<thead>
-				<tr>
-					<th>Col1</th>
-					<th>Col2</th>
-					<th>Col3</th>
-					<th>Col4</th>
-					<th>Col5</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr>
-					<td>Data</td>
-					<td>Data</td>
-					<td>Data</td>
-					<td>Data</td>
-					<td>Data</td>
-				</tr>
-				<tr>
-					<td>Data</td>
-					<td>Data</td>
-					<td>Data</td>
-					<td>Data</td>
-					<td>Data</td>
-				</tr>
-				<tr>
-					<td>Data</td>
-					<td>Data</td>
-					<td>Data</td>
-					<td>Data</td>
-					<td>Data</td>
-				</tr>
-			</tbody>
+		<table class="container" id="corr_data">
+			<script type="text/javascript">$.ajax({ url: '{% url "correlation_matrix" form.fields.start_date.initial form.fields.end_date.initial %}', 
+				success: function(data) {
+				document.getElementById('corr_data').innerHTML = (data); } });
+			</script>
 		</table>
+
 		<div class="container">
 			<canvas id="myBigChart" width="768" height="400"></canvas>
 			<script type="text/javascript">
-				$.get('{% url "poll_json" %}', function(data) {
+				$.get('{% url "poll_json" form.fields.start_date.initial form.fields.end_date.initial %}', function(data) {
 					var ctx = $("#myBigChart").get(0).getContext("2d");
 					new Chart(ctx, {
 						type: 'line', data: data
 					});
 				});
 			</script>
-		</div>	
+		</div>
+		<div id="tv_heatmap">
+			{{heatmap|safe}}
+		</div>
 	</body>
 
 	{% comment %} script for timestamp processing {% endcomment %}
 	<script>
-		var currentDate = new Date().toLocaleDateString('de-DE', {  
+		var currentDate = new Date().toLocaleDateString('de-DE', {
 			day : 'numeric',
 			month : 'short',
 			year : 'numeric',
@@ -113,5 +86,48 @@
 		var ts = "Updated " + currentDate
 		document.getElementById("timestamp").innerHTML = ts
 		console.log(ts)
+	</script>
+
+
+	<script type="text/javascript">
+	//add all other JS functions here
+	//event listener for clicking submit button
+	function onSubmitChange() {
+		var start_date_value = $('#id_start_date').val()
+		var end_date_value = $('#id_end_date').val()
+
+		// this updates the graph
+		$.ajax({
+			type:"POST",
+			url: '{% url "poll_json_post" %}',
+			data: {'start_date': $('#id_start_date').val(),
+			    'end_date': $('#id_end_date').val(),
+			    'csrfmiddlewaretoken': '{{ csrf_token }}',
+				   },
+			success: function(data) {
+				var ctx = $("#myBigChart").get(0).getContext("2d");
+				new Chart(ctx, {
+					type: 'line', data: data
+				});
+			},
+		});
+
+		// this updates the correlation matrix
+		$.ajax({
+			type:"POST",
+			url: '{% url "correlation_matrix_post" %}',
+			data: {'start_date': $('#id_start_date').val(),
+			    'end_date': $('#id_end_date').val(),
+			    'csrfmiddlewaretoken': '{{ csrf_token }}',
+				   },
+			success: function(data) {
+				document.getElementById('corr_data').innerHTML = (data); 
+			},
+		});
+
+    };
+
+
+
 	</script>
 </html>
