@@ -11,4 +11,6 @@ urlpatterns = [
     path('correlation_matrix', views.correlation_view, name='correlation_view_post'),
     # path('influence_json', views.influence_json, name='influence_json'),
     path('main_page', views.main_page, name='main_page'),
+   #path('gdelt_heatmap', views.gdelt_heatmap, name='gdelt_heatmap'),
+    #path('gdelt_heatmap/<str:start_date>/<str:end_date>', views.gdelt_heatmap, name='gdelt_heatmap')
 ]

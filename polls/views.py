@@ -12,12 +12,13 @@ import datetime
 import pytz
 import numpy as np
 import pandas as pd
+import plotly.graph_objects as go
 import os
+from plotly.offline import plot
 from django import forms
 from django.views.decorators.csrf import csrf_protect
+from django.views.generic import DetailView
 from django.shortcuts import redirect
-
-
 
 
 # Create your views here.
@@ -123,7 +124,48 @@ class PollJSONView(BaseLineChartView):
             lst_selected.append(list(self.df_pivot[can]))
         return lst_selected
 
-main_page = FormView.as_view(template_name='index.html', 
-    form_class = DateForm, success_url=u'')
+class MainPageView(FormView):
+    def post(self, request, *args, **kwargs):
+        return redirect('gdelt_heatmap')
+
+    def get(self, request, start_date = None, end_date = None, **kwargs):
+        df = pd.read_csv(os.path.join("polls", "corr_data.csv"))
+        df['Date'] = pd.to_datetime(df['Date'])
+        if start_date is not None and end_date is not None:
+            start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
+            end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
+            mask = (df['Date'] > start_date) & (df['Date'] <= end_date)
+            df = df.loc[mask]
+        df["pct"] = df["pct"].astype(float)
+        df["Value"] = df["Value"].astype(float)
+        colnames = df["Candidate"].unique()
+        rownames = df["Series"].unique()
+        cor_mat = pd.DataFrame(columns=colnames, index=rownames)
+        for col in colnames:
+            for row in rownames:
+                subset = df[df["Candidate"] == col]
+                subset = subset[subset["Series"] == row]
+
+                cor_mat.at[row, col] = np.corrcoef(subset["Value"], subset["pct"])[0, 1]
+                if cor_mat.at[row, col] != cor_mat.at[row, col] or cor_mat.at[row, col] == 0 or cor_mat.at[
+                    row, col] == -1 or cor_mat.at[row, col] == 1:
+                    cor_mat.at[row, col] = 0
+
+        hm = go.Heatmap(
+            z=cor_mat.values,
+            x=colnames,
+            y=rownames,
+            colorscale=["red", "white", "green"])
+
+        fig = go.Figure(data=hm)
+
+        plot_div = plot(fig, output_type='div', include_plotlyjs=False)
+        context = super().get_context_data(**kwargs)
+        context['heatmap'] = plot_div
+        return render(request, 'index.html', context)
+
+
+main_page = MainPageView.as_view(template_name='index.html',
+                             form_class=DateForm, success_url=u'')
 poll_json_view = PollJSONView.as_view()
 correlation_view = CorrelationView.as_view()

@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 	<title></title>
 	{% render_bundle 'main' %}
 </head>
@@ -48,6 +49,9 @@
 					});
 				});
 			</script>
+		</div>
+		<div id="tv_heatmap">
+			{{heatmap|safe}}
 		</div>
 	</body>
 
