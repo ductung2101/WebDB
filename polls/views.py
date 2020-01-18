@@ -37,23 +37,23 @@ class CorrelationView(View):
         form = DateForm(request.POST)
         if form.is_valid():
             print('yes done')
-        return redirect('correlation_view', start_date = form['start_date'].value(), end_date = form['end_date'].value())
+        return redirect('correlation_view', start_date=form['start_date'].value(), end_date=form['end_date'].value())
 
-    def get(self, request, start_date = None, end_date = None):
-        #try to replace df with model.Media
+    def get(self, request, start_date=None, end_date=None):
+        # try to replace df with model.Media
         qs = Media.pdobjects.all()
         df = qs.to_dataframe()
 
         print("qs", qs[0])
         if start_date is not None and end_date is not None:
-            #change type of start_date to be same type with Media.date
+            # change type of start_date to be same type with Media.date
             start_date_new = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
             end_date_new = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
             mask = (df['date'] > start_date_new) & (df['date'] <= end_date_new)
             df = df.loc[mask]
         df["pct"] = df["pct"].astype(float)
         df["value"] = df["value"].astype(float)
-        #import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         colnames = df["candidate"].unique()
         rownames = df["series"].unique()
         cor_mat = pd.DataFrame(columns=colnames, index=rownames)
@@ -73,8 +73,8 @@ class CorrelationView(View):
 class PollJSONView(BaseLineChartView):
     def post(self, request, *args, **kwargs):
         form = DateForm(request.POST)
-        return redirect('poll_json', start_date = form['start_date'].value(),
-                                    end_date = form['end_date'].value())
+        return redirect('poll_json', start_date=form['start_date'].value(),
+                        end_date=form['end_date'].value())
 
     def do_compute(self):
         self.n_weeks = self.kwargs.get('n_weeks')
@@ -95,9 +95,9 @@ class PollJSONView(BaseLineChartView):
         self.df_subset = self.df[self.df["party"] == "DEM"]
         self.df_pivot = self.df_subset.pivot_table(
             values="pct", index="create_week", columns="candidate_name",
-            aggfunc=np.mean).fillna(0)#.iloc[-self.n_weeks:]
+            aggfunc=np.mean).fillna(0)  # .iloc[-self.n_weeks:]
         self.df_pivot = self.df_pivot[
-            (self.df_pivot.index <= self.end_date) & 
+            (self.df_pivot.index <= self.end_date) &
             (self.df_pivot.index >= self.start_date)]
         # import pdb; pdb.set_trace()
 
@@ -124,11 +124,12 @@ class PollJSONView(BaseLineChartView):
             lst_selected.append(list(self.df_pivot[can]))
         return lst_selected
 
+
 class MainPageView(FormView):
     def post(self, request, *args, **kwargs):
         return redirect('gdelt_heatmap')
 
-    def get(self, request, start_date = None, end_date = None, **kwargs):
+    def get(self, request, start_date=None, end_date=None, **kwargs):
         df = pd.read_csv(os.path.join("polls", "corr_data.csv"))
         df['Date'] = pd.to_datetime(df['Date'])
         if start_date is not None and end_date is not None:
@@ -149,23 +150,33 @@ class MainPageView(FormView):
                 cor_mat.at[row, col] = np.corrcoef(subset["Value"], subset["pct"])[0, 1]
                 if cor_mat.at[row, col] != cor_mat.at[row, col] or cor_mat.at[row, col] == 0 or cor_mat.at[
                     row, col] == -1 or cor_mat.at[row, col] == 1:
-                    cor_mat.at[row, col] = 0
+                    cor_mat.at[row, col] = None
 
+        hover = []
+        for i in range(len(rownames)):
+            hover.append([('The impact of ' + rownames[i] + ' on ' + colnames[j] + "'s polls is " +
+                           ('positive' if cor_mat.values[i, j] > 0 else 'negative')
+                           + ' with a correlation of ' + str(cor_mat.values[i, j]))
+                          if cor_mat.values[i, j] is not None else 'There is not enough data to calculate correlation'
+                          for j in range(len(colnames))]
+                         )
         hm = go.Heatmap(
             z=cor_mat.values,
             x=colnames,
             y=rownames,
-            colorscale=["red", "white", "green"])
+            colorscale=["red", "white", "green"],
+            text=hover,
+            hoverinfo='text')
 
-        fig = go.Figure(data=hm)
-
-        plot_div = plot(fig, output_type='div', include_plotlyjs=False)
+        hm_fig = go.Figure(data=hm)
+        plot_div = plot(hm_fig, output_type='div', include_plotlyjs=False, config={'displayModeBar': False})
         context = super().get_context_data(**kwargs)
         context['heatmap'] = plot_div
+
         return render(request, 'index.html', context)
 
 
 main_page = MainPageView.as_view(template_name='index.html',
-                             form_class=DateForm, success_url=u'')
+                                 form_class=DateForm, success_url=u'')
 poll_json_view = PollJSONView.as_view()
 correlation_view = CorrelationView.as_view()
