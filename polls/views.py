@@ -21,6 +21,12 @@ from django.views.generic import DetailView
 from django.shortcuts import redirect
 
 
+def parse_daterange(daterange):
+    dates = [("-").join(y.strip().split(".")[::-1]) for y in daterange.split("-")]
+    start_date = dates[0]
+    end_date = dates[1]
+    return start_date, end_date
+
 # Create your views here.
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
@@ -39,7 +45,8 @@ class CorrelationView(View):
             print('yes done')
         return redirect('correlation_view', start_date = form['start_date'].value(), end_date = form['end_date'].value())
 
-    def get(self, request, start_date = None, end_date = None):
+    @classmethod
+    def make_table(cls, start_date = None, end_date = None):
         #try to replace df with model.Media
         qs = Media.pdobjects.all()
         df = qs.to_dataframe()
@@ -66,15 +73,19 @@ class CorrelationView(View):
                 if cor_mat.at[row, col] != cor_mat.at[row, col] or cor_mat.at[row, col] == 0 or cor_mat.at[
                     row, col] == -1 or cor_mat.at[row, col] == 1:
                     cor_mat.at[row, col] = "-"
+        
+        return cor_mat.to_html()
 
-        return HttpResponse(cor_mat.to_html())
+    def get(self, request, start_date = None, end_date = None):
+        cor_mat = self.make_table(start_date, end_date)
+        return HttpResponse(cor_mat)
 
 
 class PollJSONView(BaseLineChartView):
     def post(self, request, *args, **kwargs):
         form = DateForm(request.POST)
-        return redirect('poll_json', start_date = form['start_date'].value(),
-                                    end_date = form['end_date'].value())
+        start_date, end_date = parse_daterange(form["daterange"].value())
+        return redirect('poll_json', start_date = start_date, end_date = end_date)
 
     def do_compute(self):
         self.n_weeks = self.kwargs.get('n_weeks')
@@ -124,11 +135,19 @@ class PollJSONView(BaseLineChartView):
             lst_selected.append(list(self.df_pivot[can]))
         return lst_selected
 
-class MainPageView(FormView):
-    def post(self, request, *args, **kwargs):
-        return redirect('gdelt_heatmap')
 
-    def get(self, request, start_date = None, end_date = None, **kwargs):
+class GDeltHeatmapView(View):
+    def post(self, request, *args, **kwargs):
+        form = DateForm(request.POST)
+        return redirect('gdelt_heatmap_view', start_date = form['start_date'].value(), 
+                                            end_date = form['end_date'].value())
+
+    def get(self, request, start_date = None, end_date = None):
+        plot_div = self.make_plot(start_date, end_date)
+        return HttpResponse(plot_div)
+
+    @classmethod
+    def make_plot(cls, start_date = None, end_date = None):
         df = pd.read_csv(os.path.join("polls", "corr_data.csv"))
         df['Date'] = pd.to_datetime(df['Date'])
         if start_date is not None and end_date is not None:
@@ -160,12 +179,35 @@ class MainPageView(FormView):
         fig = go.Figure(data=hm)
 
         plot_div = plot(fig, output_type='div', include_plotlyjs=True)
+        return plot_div
+    
+
+class MainPageView(FormView):
+    template_name = 'index.html'
+    form_class = DateForm
+    success_url = '.'
+
+    # add items to the context
+    def get_context_data(self,  **kwargs):
         context = super().get_context_data(**kwargs)
+        form = super().get_form()
+
+        start_date, end_date = parse_daterange(form["daterange"].value())
+
+        # make plot
+        plot_div = GDeltHeatmapView.make_plot(start_date, end_date)
         context['heatmap'] = plot_div
-        return render(request, 'index.html', context)
 
+        # make corr matrix
+        cor_div = CorrelationView.make_table(start_date, end_date)
+        context['corr_table'] = cor_div
 
-main_page = MainPageView.as_view(template_name='index.html',
-                             form_class=DateForm, success_url=u'')
+        return context
+
+    def form_valid(self, form):
+        return super().get(form)
+
+main_page = MainPageView.as_view()
 poll_json_view = PollJSONView.as_view()
 correlation_view = CorrelationView.as_view()
+gdelt_heatmap_view = GDeltHeatmapView.as_view()

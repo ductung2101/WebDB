@@ -25,7 +25,7 @@
 		</div>
 		<div class="container">
 			<div class="card center">
-				<form action='/' method="post">
+				<form action='/polls/main_page' method="post">
 					{% csrf_token %}
 					<div class="form-group">
 						{{ form.daterange.errors }}
@@ -55,27 +55,33 @@
 			</div>
 		</div>
 		<table class="container" id="corr_data">
-			<script type="text/javascript">
-				$.ajax({ url: '{% url "correlation_view" form.fields.start_date.initial form.fields.end_date.initial %}', 
-					success: function(data) {
-					document.getElementById('corr_data').innerHTML = (data); } });
-			</script>
+			{{ corr_table | safe }}
 		</table>
 
 		<div class="container">
 			<canvas id="myBigChart" width="768" height="400"></canvas>
 			<script type="text/javascript">
-				$.get('{% url "poll_json" form.fields.start_date.initial form.fields.end_date.initial %}', 
-				function(data) {
-					var ctx = $("#myBigChart").get(0).getContext("2d");
-					bigChart = new Chart(ctx, {
-						type: 'line', data: data
-					});
+				// this updates the graph
+				var daterange = $('#id_daterange').get(0).value
+				console.log(daterange)
+				// console.log($('#id_daterange').data('daterangepicker').startDate._d)
+				$.ajax({
+					type:"POST",
+					url: '{% url "poll_json_post" %}',
+					data: {'daterange': daterange,
+							'csrfmiddlewaretoken': '{{ csrf_token }}',
+					},
+					success: function(data) {
+						var ctx = $("#myBigChart").get(0).getContext("2d");
+						bigChart = new Chart(ctx, {
+							type: 'line', data: data
+						});
+					},
 				});
 			</script>
 		</div>
-		<div id="tv_heatmap">
-			{{heatmap|safe}}
+		<div id="gdelt_heatmap">
+			{{heatmap | safe}}
 		</div>
 	</body>
 
@@ -85,9 +91,7 @@
 	$(function() {
 		$('input[name="daterange"]').daterangepicker({
 			opens: 'left'
-		}, function(start, end, label) {
-			onSubmitChange(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'))
-	});
+		});
 });
 </script>
 
@@ -103,41 +107,6 @@
 	var ts = "Updated " + currentDate
 	document.getElementById("timestamp").innerHTML = ts
 	console.log(ts)
-</script>
-
-
-<script type="text/javascript">
-	//add all other JS functions here
-	//event listener for clicking submit button
-	function onSubmitChange(start_date_value, end_date_value) {
-		// this updates the graph
-		$.ajax({
-			type:"POST",
-			url: '{% url "poll_json_post" %}',
-			data: {'start_date': start_date_value,
-				'end_date': end_date_value,
-				'csrfmiddlewaretoken': '{{ csrf_token }}',
-			},
-			success: function(data) {
-				bigChart.data = data;
-				bigChart.update()
-			},
-		});
-
-		// this updates the correlation matrix
-		$.ajax({
-			type:"POST",
-			url: '{% url "correlation_view_post" %}',
-			data: {'start_date': start_date_value,
-				'end_date': end_date_value,
-				'csrfmiddlewaretoken': '{{ csrf_token }}',
-			},
-			success: function(data) {
-				document.getElementById('corr_data').innerHTML = (data); 
-			},
-		});
-
-	};
 </script>
 
 </html>
