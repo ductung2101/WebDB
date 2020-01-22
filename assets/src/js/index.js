@@ -6,6 +6,7 @@ import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import moment from 'moment';
 import 'selectize'
+import 'bootstrap-select'
 var Plotly = require('plotly.js-dist');
 moment.locale('de')
 

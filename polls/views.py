@@ -192,6 +192,8 @@ class MainPageView(FormView):
         context = super().get_context_data(**kwargs)
         form = super().get_form()
 
+        print (form["candidates"].value())
+
         start_date, end_date = parse_daterange(form["daterange"].value())
 
         # make plot
