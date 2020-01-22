@@ -14,8 +14,26 @@
 </head>
 
 <body>
-	<header>
+	<header id="myHeader">
 		<div id="title">Web DB App</div>
+		<div id="form" class="container">
+			<form action='/polls/main_page' method="post">
+				{% csrf_token %}
+				<div class="form-group">
+					{{ form.daterange.errors }}
+					{{ form.daterange.label_tag }}
+					{{ form.daterange }}
+				</div>
+				<div class="form-group">
+					{{ form.candidates.errors }}
+					{{ form.candidates.label_tag }}
+					{{ form.candidates }}
+				</div>
+				<div class="form-group">
+					<button type="submit" class="btn btn-primary">Submit</button>
+				</div>
+			<form/>
+		</div>
 	</header>
 		<div class="container">
 			<div id="intro">
@@ -26,26 +44,6 @@
 				<h1>Dashboard</h1>
 				<h2>Placeholder</h2>
 				<h3>Here we should write some cool introduction.</h3>
-			</div>
-		</div>
-		<div class="container">
-			<div class="card center">
-				<form action='/polls/main_page' method="post">
-					{% csrf_token %}
-					<div class="form-group">
-						{{ form.daterange.errors }}
-						{{ form.daterange.label_tag }}
-						{{ form.daterange }}
-					</div>
-					<div class="form-group">
-						{{ form.candidates.errors }}
-						{{ form.candidates.label_tag }}
-						{{ form.candidates }}
-					</div>
-					<div class="form-group">
-						<button type="submit" class="btn btn-primary">Submit</button>
-					</div>
-				<form/>
 			</div>
 		</div>
 		<table class="container" id="corr_data">
@@ -104,6 +102,25 @@
 	var ts = "Updated " + currentDate
 	document.getElementById("timestamp").innerHTML = ts
 	console.log(ts)
+</script>
+
+<script>
+	// When the user scrolls the page, execute myFunction
+	window.onscroll = function() {myFunction()};
+
+	// Get the header
+	var header = document.getElementById("myHeader");
+
+	// Get the offset position of the navbar
+	var sticky = header.offsetTop;
+
+	// Add the sticky class to the header when you reach its scroll position. Remove "sticky" when you leave the scroll position
+	function myFunction() {
+	if (window.pageYOffset > sticky) {
+		header.classList.add("sticky");
+	} else {
+		header.classList.remove("sticky");
+	}
 </script>
 
 </html>
