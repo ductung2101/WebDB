@@ -3,8 +3,8 @@ from bootstrap_select import BootstrapSelect
 from django_select2.forms import Select2MultipleWidget
 
 CANDIDATES=(
-    (0, 'a'),
-    (1, 'b'),
+    (0, 'aabsabdsiad'),
+    (1, 'bsdiasjdasdamsd'),
     (2, 'c'),
     (3, 'd'),
 )
