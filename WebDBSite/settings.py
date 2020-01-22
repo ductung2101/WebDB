@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'webpack_loader',
     'bootstrap_select.apps.BootstrapSelectConfig',
+    'django_select2',
 ]
 
 MIDDLEWARE = [
