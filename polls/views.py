@@ -145,29 +145,30 @@ class GDeltHeatmapView(View):
                         end_date=form['end_date'].value())
 
     def get(self, request, start_date=None, end_date=None):
-        plot_div = self.make_plot(start_date, end_date)
+        plot_div = self.make_heatmap(start_date, end_date)
         return HttpResponse(plot_div)
 
     @classmethod
     def make_heatmap(cls, start_date=None, end_date=None):
-        df = pd.read_csv(os.path.join("polls", "corr_data.csv"))
-        df['Date'] = pd.to_datetime(df['Date'])
+        qs = Media.pdobjects.all()
+        df = qs.to_dataframe()
+        df['date'] = pd.to_datetime(df['date'])
         if start_date is not None and end_date is not None:
             start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
             end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
-            mask = (df['Date'] > start_date) & (df['Date'] <= end_date)
+            mask = (df['date'] > start_date) & (df['date'] <= end_date)
             df = df.loc[mask]
         df["pct"] = df["pct"].astype(float)
-        df["Value"] = df["Value"].astype(float)
-        colnames = df["Candidate"].unique()
-        rownames = df["Series"].unique()
+        df["value"] = df["value"].astype(float)
+        colnames = df["candidate"].unique()
+        rownames = df["series"].unique()
         cor_mat = pd.DataFrame(columns=colnames, index=rownames)
         for col in colnames:
             for row in rownames:
-                subset = df[df["Candidate"] == col]
-                subset = subset[subset["Series"] == row]
+                subset = df[df["candidate"] == col]
+                subset = subset[subset["series"] == row]
 
-                cor_mat.at[row, col] = np.corrcoef(subset["Value"], subset["pct"])[0, 1]
+                cor_mat.at[row, col] = np.corrcoef(subset["value"], subset["pct"])[0, 1]
                 if cor_mat.at[row, col] != cor_mat.at[row, col] or cor_mat.at[row, col] == 0 or cor_mat.at[
                     row, col] == -1 or cor_mat.at[row, col] == 1:
                     cor_mat.at[row, col] = None
@@ -195,18 +196,19 @@ class GDeltHeatmapView(View):
 
     @classmethod
     def make_radar_chart(cls):
-        df = pd.read_csv(os.path.join("polls", "corr_data.csv"))
-        df['Date'] = pd.to_datetime(df['Date'])
+        qs = Media.pdobjects.all()
+        df = qs.to_dataframe()
+        df['date'] = pd.to_datetime(df['date'])
         start_date = datetime.datetime.strptime('2018-12-01', '%Y-%m-%d')
         end_date = datetime.datetime.strptime('2018-12-30', '%Y-%m-%d')
-        mask = (df['Date'] > start_date) & (df['Date'] <= end_date)
+        mask = (df['date'] > start_date) & (df['date'] <= end_date)
         df = df.loc[mask]
 
-        series_a = df['Series'] == 'MSNBC'
-        series_b = df['Series'] == 'CNN'
-        categories = df[series_a]['Candidate'][:5]
-        chart_data_a = df[series_a].groupby(['Candidate'])['Value'].agg('mean')[:5]
-        chart_data_b = df[series_b].groupby(['Candidate'])['Value'].agg('mean')[:5]
+        series_a = df['series'] == 'MSNBC'
+        series_b = df['series'] == 'CNN'
+        categories = df[series_a]['candidate'][:5]
+        chart_data_a = df[series_a].groupby(['candidate'])['value'].agg('mean')[:5]
+        chart_data_b = df[series_b].groupby(['candidate'])['value'].agg('mean')[:5]
         fig = go.Figure()
 
         fig.add_trace(go.Scatterpolar(
@@ -236,12 +238,13 @@ class GDeltHeatmapView(View):
 
     @classmethod
     def make_scatter_plot(cls):
-        df = pd.read_csv(os.path.join("polls", "corr_data.csv"))
-        df['Date'] = pd.to_datetime(df['Date'])
+        qs = Media.pdobjects.all()
+        df = qs.to_dataframe()
+        df['date'] = pd.to_datetime(df['date'])
 
-        df = df[df.Candidate == 'Warren']
-        df = df[df.Series == 'FOXNEWS']
-        fig = px.scatter(df, x="Value", y="pct", trendline="ols")
+        df = df[df.candidate == 'Warren']
+        df = df[df.series == 'FOXNEWS']
+        fig = px.scatter(df, x="value", y="pct", trendline="ols")
 
         plot_div = plot(fig, output_type='div', include_plotlyjs=True)
         return plot_div
