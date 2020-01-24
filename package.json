@@ -20,6 +20,7 @@
   "homepage": "https://github.com/ductung2101/WebDB#readme",
   "dependencies": {
     "bootstrap": "^4.4.1",
+    "bootstrap-select": "^1.13.12",
     "chart.js": "^2.9.3",
     "d3": "^5.14.2",
     "daterangepicker": "^3.0.5",

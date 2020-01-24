@@ -170,13 +170,23 @@ class GDeltHeatmapView(View):
                 cor_mat.at[row, col] = np.corrcoef(subset["Value"], subset["pct"])[0, 1]
                 if cor_mat.at[row, col] != cor_mat.at[row, col] or cor_mat.at[row, col] == 0 or cor_mat.at[
                     row, col] == -1 or cor_mat.at[row, col] == 1:
-                    cor_mat.at[row, col] = 0
+                    cor_mat.at[row, col] = None
 
+        hover = []
+        for i in range(len(rownames)):
+            hover.append([('The impact of ' + rownames[i] + ' on ' + colnames[j] + "'s polls is " +
+                           ('positive' if cor_mat.values[i, j] > 0 else 'negative')
+                           + ' with a correlation of ' + str(cor_mat.values[i, j]))
+                          if cor_mat.values[i, j] is not None else 'There is not enough data to calculate correlation'
+                          for j in range(len(colnames))]
+                         )
         hm = go.Heatmap(
             z=cor_mat.values,
             x=colnames,
             y=rownames,
-            colorscale=["red", "white", "green"])
+            colorscale=["red", "white", "green"],
+            text=hover,
+            hoverinfo='text')
 
         fig = go.Figure(data=hm)
 
@@ -246,6 +256,8 @@ class MainPageView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         form = super().get_form()
+
+        print (form["candidates"].value())
 
         start_date, end_date = parse_daterange(form["daterange"].value())
 
