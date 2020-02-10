@@ -7,7 +7,7 @@ from django_pandas.managers import DataFrameManager
 import requests
 from requests.auth import HTTPDigestAuth
 import json
-
+import pdb
 
 class Question(models.Model):
     question_text = models.CharField(max_length=200)
@@ -42,7 +42,9 @@ def convertDateField(str):
         temp = str[0:10]
         return datetime.datetime.strptime(temp, '%Y-%m-%d')
 
+
 class Poll(models.Model):
+    objects = models.Manager()
     pdobjects = DataFrameManager()
     question_id = models.CharField(max_length=200)
     poll_id = models.CharField(max_length=200)
@@ -77,14 +79,12 @@ class Poll(models.Model):
     candidate_id = models.CharField(max_length=200)
     candidate_name = models.CharField(max_length=200)
     pct = models.FloatField()
+    #class Meta:
+        #order_with_respect_to = 'start_date'
 
 
 class Media(models.Model):
     pdobjects = DataFrameManager()
-    url = 'https://api.gdeltproject.org/api/v2/tv/tv?query=trump%20market:%22National%22&mode=timelinevol&format=json&datanorm=perc&timelinesmooth=0&datacomb=sep&last24=yes&timezoom=yes'
-    response = requests.get(url).json()
-    #data = json.load(response)
-    #print(data["timeline"])
     media_id = models.IntegerField()
     answer = models.CharField(max_length=200)
     create_week = models.DateField()
@@ -94,7 +94,15 @@ class Media(models.Model):
     value = models.FloatField()
     candidate = models.CharField(max_length=200)
 
-'''file_path = "C:\\Users\\ndtun\\PycharmProjects\\WebDB\\WebDBSite\\polls\\corr_data.csv"
+
+# automatically download file from given URL and return whether file are different than corr_data.csv
+'''file_path = "C:\\Users\\ndtun\\PycharmProjects\\WebDB\\WebDBSite\\president_primary_polls.csv"
+temp = pd.read_csv(file_path, sep=',', quotechar='"')
+with open(file_path, 'r') as csv_file:
+    reader = csv.reader(csv_file, delimiter=',', quotechar='"')
+    header = next(reader)'''
+
+''' file_path = "C:\\Users\\ndtun\\PycharmProjects\\WebDB\\WebDBSite\\polls\\corr_data.csv"
 temp = pd.read_csv(file_path, sep=',', quotechar='"')
 with open(file_path, 'r') as csv_file:
     reader = csv.reader(csv_file, delimiter=',', quotechar='"')
@@ -149,7 +157,7 @@ with open(file_path, 'r') as csv_file:
                 end_date=convertDateField(row[18]),
                 sponsor_candidate=row[19],
                 internal=row[20],
-                partisan=row[21],
+                partisan=row[21], 
                 tracking=row[22],
                 nationwide_batch=row[23],
                 created_at=convertingdatetimefield(row[24]),
