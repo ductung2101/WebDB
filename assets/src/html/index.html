@@ -76,6 +76,8 @@
 			</script>
 		</div>
 		<div id="gdelt_heatmap">
+			<div>The most significant negative correlation occurred between {{cor_min_series | safe}} and {{cor_min_candidate | safe}} with the value: {{cor_min_val | safe}} </div>
+			<div>The most significant positive correlation occurred between {{cor_max_series | safe}} and {{cor_max_candidate | safe}} with the value: {{cor_max_val | safe}}</div>
 			{{heatmap | safe}}
 		</div>
 		<div id="gdelt_scatter">

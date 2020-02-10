@@ -138,53 +138,67 @@ class PollJSONView(BaseLineChartView):
         return lst_selected
 
 
-class GDeltHeatmapView(View):
-    def post(self, request, *args, **kwargs):
-        form = DateForm(request.POST)
-        return redirect('gdelt_heatmap_view', start_date=form['start_date'].value(),
-                        end_date=form['end_date'].value())
-
-    def get(self, request, start_date=None, end_date=None):
-        plot_div = self.make_heatmap(start_date, end_date)
-        return HttpResponse(plot_div)
-
-    @classmethod
-    def make_heatmap(cls, start_date=None, end_date=None):
+class GDeltAnalysisPlot:
+    def __init__(self, start_date=None, end_date=None):
         qs = Media.pdobjects.all()
-        df = qs.to_dataframe()
-        df['date'] = pd.to_datetime(df['date'])
+        self.date_filtered_df = qs.to_dataframe()
         if start_date is not None and end_date is not None:
-            start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
-            end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
-            mask = (df['date'] > start_date) & (df['date'] <= end_date)
-            df = df.loc[mask]
-        df["pct"] = df["pct"].astype(float)
-        df["value"] = df["value"].astype(float)
-        colnames = df["candidate"].unique()
-        rownames = df["series"].unique()
-        cor_mat = pd.DataFrame(columns=colnames, index=rownames)
-        for col in colnames:
-            for row in rownames:
-                subset = df[df["candidate"] == col]
+            # change type of start_date to be same type with Media.date
+            start_date_new = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date_new = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
+            mask = (self.date_filtered_df['date'] > start_date_new) & (self.date_filtered_df['date'] <= end_date_new)
+            self.date_filtered_df = self.date_filtered_df.loc[mask]
+
+        self.date_filtered_df["pct"] = self.date_filtered_df["pct"].astype(float)
+        self.date_filtered_df["value"] = self.date_filtered_df["value"].astype(float)
+
+        self.candidates = self.date_filtered_df["candidate"].unique()
+        self.series = self.date_filtered_df["series"].unique()
+        self.min_cor = 2
+        self.min_cand = None
+        self.min_ser = None
+        self.max_cor = -2
+        self.max_cand = None
+        self.max_ser = None
+        self.cor_mat = self.make_cor_mat()
+
+    def make_cor_mat(self):
+        cor_mat = pd.DataFrame(columns=self.candidates, index=self.series)
+        for col in self.candidates:
+            for row in self.series:
+                subset = self.date_filtered_df[self.date_filtered_df["candidate"] == col]
                 subset = subset[subset["series"] == row]
 
                 cor_mat.at[row, col] = np.corrcoef(subset["value"], subset["pct"])[0, 1]
-                if cor_mat.at[row, col] != cor_mat.at[row, col] or cor_mat.at[row, col] == 0 or cor_mat.at[
-                    row, col] == -1 or cor_mat.at[row, col] == 1:
+                if cor_mat.at[row, col] != cor_mat.at[row, col] or cor_mat.at[row, col] == 0 or cor_mat.at[row, col] \
+                        == -1 or cor_mat.at[row, col] == 1:
                     cor_mat.at[row, col] = None
+                if cor_mat.at[row, col] is not None and cor_mat.at[row, col] < self.min_cor:
+                    self.min_cor = cor_mat.at[row, col]
+                    self.min_cand = col
+                    self.min_ser = row
+                if cor_mat.at[row, col] is not None and cor_mat.at[row, col] > self.max_cor:
+                    self.max_cor = cor_mat.at[row, col]
+                    self.max_cand = col
+                    self.max_ser = row
 
+        return cor_mat
+
+    def make_heatmap(self):
         hover = []
-        for i in range(len(rownames)):
-            hover.append([('The impact of ' + rownames[i] + ' on ' + colnames[j] + "'s polls is " +
-                           ('positive' if cor_mat.values[i, j] > 0 else 'negative')
-                           + ' with a correlation of ' + str(cor_mat.values[i, j]))
-                          if cor_mat.values[i, j] is not None else 'There is not enough data to calculate correlation'
-                          for j in range(len(colnames))]
+        for i in range(len(self.series)):
+            hover.append([('The impact of ' + self.series[i] + ' on ' + self.candidates[j] + "'s polls is " +
+                           ('positive' if (self.cor_mat.values[
+                                               i, j] > 0) else 'negative')
+                           + ' with a correlation of ' + str(self.cor_mat.values[i, j]))
+                          if self.cor_mat.values[
+                                 i, j] is not None else 'There is not enough data to calculate correlation'
+                          for j in range(len(self.candidates))]
                          )
         hm = go.Heatmap(
-            z=cor_mat.values,
-            x=colnames,
-            y=rownames,
+            z=self.cor_mat.values,
+            x=self.candidates,
+            y=self.series,
             colorscale=["red", "white", "green"],
             text=hover,
             hoverinfo='text')
@@ -192,23 +206,15 @@ class GDeltHeatmapView(View):
         fig = go.Figure(data=hm)
 
         plot_div = plot(fig, output_type='div', include_plotlyjs=True)
+
         return plot_div
 
-    @classmethod
-    def make_radar_chart(cls):
-        qs = Media.pdobjects.all()
-        df = qs.to_dataframe()
-        df['date'] = pd.to_datetime(df['date'])
-        start_date = datetime.datetime.strptime('2018-12-01', '%Y-%m-%d')
-        end_date = datetime.datetime.strptime('2018-12-30', '%Y-%m-%d')
-        mask = (df['date'] > start_date) & (df['date'] <= end_date)
-        df = df.loc[mask]
-
-        series_a = df['series'] == 'MSNBC'
-        series_b = df['series'] == 'CNN'
-        categories = df[series_a]['candidate'][:5]
-        chart_data_a = df[series_a].groupby(['candidate'])['value'].agg('mean')[:5]
-        chart_data_b = df[series_b].groupby(['candidate'])['value'].agg('mean')[:5]
+    def make_radar_chart(self):
+        series_a = self.date_filtered_df['series'] == 'MSNBC'
+        series_b = self.date_filtered_df['series'] == 'CNN'
+        categories = self.date_filtered_df[series_a]['candidate'][:5]
+        chart_data_a = self.date_filtered_df[series_a].groupby(['candidate'])['value'].agg('mean')[:5]
+        chart_data_b = self.date_filtered_df[series_b].groupby(['candidate'])['value'].agg('mean')[:5]
         fig = go.Figure()
 
         fig.add_trace(go.Scatterpolar(
@@ -236,14 +242,9 @@ class GDeltHeatmapView(View):
         plot_div = plot(fig, output_type='div', include_plotlyjs=True)
         return plot_div
 
-    @classmethod
-    def make_scatter_plot(cls):
-        qs = Media.pdobjects.all()
-        df = qs.to_dataframe()
-        df['date'] = pd.to_datetime(df['date'])
-
-        df = df[df.candidate == 'Warren']
-        df = df[df.series == 'FOXNEWS']
+    def make_scatter_plot(self):
+        df = self.date_filtered_df[self.date_filtered_df.candidate == 'Warren']
+        df = df[self.date_filtered_df.series == 'FOXNEWS']
         fig = px.scatter(df, x="value", y="pct", trendline="ols")
 
         plot_div = plot(fig, output_type='div', include_plotlyjs=True)
@@ -260,22 +261,31 @@ class MainPageView(FormView):
         context = super().get_context_data(**kwargs)
         form = super().get_form()
 
-        print (form["candidates"].value())
+        print(form["candidates"].value())
 
         start_date, end_date = parse_daterange(form["daterange"].value())
 
+        plot_data = GDeltAnalysisPlot(start_date, end_date)
+
         # make heatmap
-        context['heatmap'] = GDeltHeatmapView.make_heatmap(start_date, end_date)
+        context['heatmap'] = plot_data.make_heatmap()
 
         # make radar
-        context['radar'] = GDeltHeatmapView.make_radar_chart()
+        context['radar'] = plot_data.make_radar_chart()
 
         # make scatter
-        context['scatter'] = GDeltHeatmapView.make_scatter_plot()
+        context['scatter'] = plot_data.make_scatter_plot()
 
         # make corr matrix
-        cor_div = CorrelationView.make_table(start_date, end_date)
-        context['corr_table'] = cor_div
+        context['corr_table'] = plot_data.cor_mat.to_html
+
+        # get minmax data
+        context['cor_min_val'] = plot_data.min_cor
+        context['cor_min_candidate'] = plot_data.min_cand
+        context['cor_min_series'] = plot_data.min_ser
+        context['cor_max_val'] = plot_data.max_cor
+        context['cor_max_candidate'] = plot_data.max_cand
+        context['cor_max_series'] = plot_data.max_ser
 
         return context
 
@@ -285,5 +295,5 @@ class MainPageView(FormView):
 
 main_page = MainPageView.as_view()
 poll_json_view = PollJSONView.as_view()
-correlation_view = CorrelationView.as_view()
-gdelt_heatmap_view = GDeltHeatmapView.as_view()
+# correlation_view = CorrelationView.as_view()
+# gdelt_heatmap_view = GDeltAnalysisPlotView.as_view()
