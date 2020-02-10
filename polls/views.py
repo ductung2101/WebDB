@@ -124,7 +124,7 @@ def sub(request):
     return HttpResponse(html)
 
 
-class CorrelationView(View):
+'''class CorrelationView(View):
     def post(self, request, *args, **kwargs):
         form = DateForm(request.POST)
         if form.is_valid():
@@ -164,7 +164,7 @@ class CorrelationView(View):
 
     def get(self, request, start_date=None, end_date=None):
         cor_mat = self.make_table(start_date, end_date)
-        return HttpResponse(cor_mat)
+        return HttpResponse(cor_mat)'''
 
 
 class PollJSONView(BaseLineChartView):
@@ -223,7 +223,7 @@ class PollJSONView(BaseLineChartView):
 
 
 class GDeltAnalysisPlot:
-    def __init__(self, start_date=None, end_date=None):
+    def __init__(self, start_date=None, end_date=None, selected_candidates=None, selected_series=None):
         qs = Media.pdobjects.all()
         self.date_filtered_df = qs.to_dataframe()
         if start_date is not None and end_date is not None:
@@ -236,8 +236,16 @@ class GDeltAnalysisPlot:
         self.date_filtered_df["pct"] = self.date_filtered_df["pct"].astype(float)
         self.date_filtered_df["value"] = self.date_filtered_df["value"].astype(float)
 
-        self.candidates = self.date_filtered_df["candidate"].unique()
-        self.series = self.date_filtered_df["series"].unique()
+        if selected_candidates is None:
+            self.candidates = self.date_filtered_df["candidate"].unique()
+        else:
+            self.candidates = selected_candidates
+
+        if selected_series is None:
+            self.series = self.date_filtered_df["series"].unique()
+        else:
+            self.series = selected_series;
+
         self.min_cor = 2
         self.min_cand = None
         self.min_ser = None
