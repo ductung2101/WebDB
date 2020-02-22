@@ -43,6 +43,7 @@ def parse_daterange(daterange):
     return start_date, end_date
 
 
+
 # auto update poll using requests
 def auto_update_president_polls():
     url = 'https://projects.fivethirtyeight.com/polls-page/president_primary_polls.csv'
@@ -62,7 +63,7 @@ def auto_update_president_polls():
         for row in reader:
             current_poll_id = row[1]
             current_candidate_id = row[30]
-            print(current_poll_id)
+            # print(current_poll_id)
             if Poll.objects.filter(poll_id=current_poll_id, candidate_id=current_candidate_id).count() == 0:
                 subsequent_no_new_poll = 0
                 _, created = Poll.objects.get_or_create(
@@ -104,7 +105,7 @@ def auto_update_president_polls():
                     created.save()
             else:
                 subsequent_no_new_poll += 1
-            if subsequent_no_new_poll == 1000:
+            if subsequent_no_new_poll == 200:
                 break
     # problem: date is sorted decreasingly, if new records are written, they are added to the end
     # -> need to sort whole DB due to start_date -> not optimal, use poll_id instead.
