@@ -1,25 +1,21 @@
-from django.shortcuts import render
 from django.http import HttpResponse
-from django.http import HttpResponseRedirect
-from django.views import View
-from django.views.generic import TemplateView, FormView
-from chartjs.views.lines import BaseLineChartView
-from chartjs.views.lines import HighchartPlotLineChartView
-from random import randint
-from polls.models import Poll, Media
-from polls.forms import DateForm
-import datetime, requests, csv
-import pytz
+import csv
+import datetime
+import requests
+
 import numpy as np
 import pandas as pd
-import plotly.graph_objects as go
 import plotly.express as px
-import os
-from plotly.offline import plot
-from django import forms
-from django.views.decorators.csrf import csrf_protect
-from django.views.generic import DetailView
+import plotly.graph_objects as go
+import pytz
+from chartjs.views.lines import BaseLineChartView
+from django.http import HttpResponse
 from django.shortcuts import redirect
+from django.views.generic import FormView
+from plotly.offline import plot
+
+from polls.forms import DateForm
+from polls.models import Poll, Media
 
 
 def convertingdatetimefield(str):
