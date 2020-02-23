@@ -79,11 +79,23 @@
                 {% comment %} {{ form.daterange.label_tag }} {% endcomment %}
                 {{ form.daterange }}
               </div>
+              State:
+              <div class="form-group d-flex">
+                {{ form.state.errors }}
+                {% comment %} {{ form.candidates.label_tag }} {% endcomment %}
+                {{ form.state }}
+              </div>
               Candidates:
               <div class="form-group d-flex">
                 {{ form.candidates.errors }}
                 {% comment %} {{ form.candidates.label_tag }} {% endcomment %}
                 {{ form.candidates }}
+              </div>
+              Outlets:
+              <div class="form-group d-flex">
+                {{ form.outlets.errors }}
+                {% comment %} {{ form.candidates.label_tag }} {% endcomment %}
+                {{ form.outlets }}
               </div>
               <div class="form-group">
                 <button type="submit" class="btn btn-primary">Submit</button>

@@ -31,4 +31,10 @@ class DataLoader:
     def get_media(self):
         return self.__media
 
+    # helper functions
+    def get_candidate_list(self):
+        return self.__media['candidate'].unique()
+    def get_outlets_list(self):
+        return self.__media['series'].unique()
+
     

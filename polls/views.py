@@ -14,7 +14,6 @@ from django.views.generic import FormView
 from plotly.offline import plot
 
 from polls.forms import DateForm
-from polls.models import Poll, Media
 
 from polls.data import DataLoader
 from polls.updatedb import auto_update_president_polls
@@ -37,6 +36,8 @@ class PollJSONView(BaseLineChartView):
         form = DateForm(request.POST)
         start_date, end_date = parse_daterange(form["daterange"].value())
         candidates = form["candidates"].value()[0]
+        if len(candidates) == 0:
+            candidates = "-".join(DataLoader.instance().get_candidate_list())
         return redirect('poll_json', start_date=start_date, end_date=end_date,
                         candidates=candidates)
 
@@ -98,14 +99,14 @@ class GDeltAnalysisPlot:
         self.date_filtered_df["pct"] = self.date_filtered_df["pct"].astype(float)
         self.date_filtered_df["value"] = self.date_filtered_df["value"].astype(float)
 
-        if selected_candidates is None:
-            self.candidates = self.date_filtered_df["candidate"].unique()
+        if selected_candidates is None or len(selected_candidates) == 0:
+            self.candidates = DataLoader.instance().get_candidate_list()
         else:
             self.candidates = selected_candidates
         print("Rendering for candidates", self.candidates, "from query", selected_candidates)
 
         if selected_series is None:
-            self.series = self.date_filtered_df["series"].unique()
+            self.series = DataLoader.instance().get_outlets_list()
         else:
             self.series = selected_series
         print("Rendering for series", self.series)
@@ -293,7 +294,7 @@ class CandidatePageView(FormView):
     def form_valid(self, form):
         return super().get(form)
 
-auto_update_president_polls()
+# auto_update_president_polls()
 main_page = MainPageView.as_view()
 candidate = CandidatePageView.as_view()
 poll_json_view = PollJSONView.as_view()

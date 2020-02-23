@@ -1,16 +1,24 @@
 from django import forms
 import pdb, numpy
 import pandas as pd
+import numpy as np
 from bootstrap_select import BootstrapSelect
 from django_select2.forms import Select2MultipleWidget, Select2Widget
 
 from polls.models import Poll, Media
 from polls.data import DataLoader
 
-qs = Media.pdobjects.all().to_dataframe()
-candidate_list = qs['candidate'].unique()
-CANDIDATES=zip(candidate_list,candidate_list)
+# DataLoader()
+CANDIDATES=zip(DataLoader.instance().get_candidate_list(),
+    DataLoader.instance().get_candidate_list())
 
+OUTLETS=zip(DataLoader.instance().get_outlets_list(),
+    DataLoader.instance().get_outlets_list())
+
+states = DataLoader.instance().get_polls()["state"].unique()
+states = np.sort(states)
+states = list(map(lambda x: "National" if x == "" else x, states))
+STATES=zip(states, states)
 
 class DateForm(forms.Form):
     daterange = forms.CharField(
@@ -23,24 +31,28 @@ class DateForm(forms.Form):
 
     candidates = forms.MultipleChoiceField(
         choices=CANDIDATES,
+        required = False,
         widget = Select2MultipleWidget(
             attrs={'class': 'form-control'}
         )
     )
 
-    # outlets = forms.MultipleChoiceField(
-    #     choices=CANDIDATES,
-    #     widget = Select2MultipleWidget(
-    #         attrs={'class': 'form-control'}
-    #     )
-    # )
+    outlets = forms.MultipleChoiceField(
+        choices=OUTLETS,
+        required = False,
+        widget = Select2MultipleWidget(
+            attrs={'class': 'form-control'}
+        )
+    )
 
-    # state = forms.ChoiceField(
-    #     choices=STATES,
-    #     widget = Select2Widget(
-    #         attrs={'class': 'form-control'}
-    #     )
-    # )
+    state = forms.ChoiceField(
+        choices=STATES,
+        required = False,
+        initial = "",
+        widget = Select2Widget(
+            attrs={'class': 'form-control'}
+        )
+    )
         # widget=forms.CheckboxSelectMultiple()
     # candidates = forms.CharField(label = "Candidates", 
     #     widget = BootstrapSelect(
