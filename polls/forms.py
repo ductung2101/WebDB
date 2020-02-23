@@ -1,13 +1,15 @@
 from django import forms
+import pdb, numpy
+import pandas as pd
 from bootstrap_select import BootstrapSelect
 from django_select2.forms import Select2MultipleWidget
+from polls.models import Poll, Media
 
-CANDIDATES=(
-    (0, 'aabsabdsiad'),
-    (1, 'bsdiasjdasdamsd'),
-    (2, 'c'),
-    (3, 'd'),
-)
+qs = Media.pdobjects.all().to_dataframe()
+candidate_list = qs['candidate'].unique()
+index = numpy.arange(1,len(candidate_list)+1)
+CANDIDATES=zip(index,candidate_list)
+
 
 class DateForm(forms.Form):
     daterange = forms.CharField(

@@ -95,13 +95,6 @@ class Media(models.Model):
     candidate = models.CharField(max_length=200)
 
 
-# automatically download file from given URL and return whether file are different than corr_data.csv
-'''file_path = "C:\\Users\\ndtun\\PycharmProjects\\WebDB\\WebDBSite\\president_primary_polls.csv"
-temp = pd.read_csv(file_path, sep=',', quotechar='"')
-with open(file_path, 'r') as csv_file:
-    reader = csv.reader(csv_file, delimiter=',', quotechar='"')
-    header = next(reader)'''
-
 ''' file_path = "C:\\Users\\ndtun\\PycharmProjects\\WebDB\\WebDBSite\\polls\\corr_data.csv"
 temp = pd.read_csv(file_path, sep=',', quotechar='"')
 with open(file_path, 'r') as csv_file:
@@ -122,52 +115,4 @@ with open(file_path, 'r') as csv_file:
                 series=row[5],
                 value=row[6],
                 candidate=row[7],
-                )
-
-comment to disable loading data, uncomment to update data manually
-file_path = "C:\\Users\\ndtun\\PycharmProjects\\WebDB\\WebDBSite\\president_primary_polls.csv"
-temp = pd.read_csv(file_path, sep=',', quotechar='"')
-with open(file_path, 'r') as csv_file:
-    reader = csv.reader(csv_file, delimiter=',', quotechar='"')
-    header = next(reader)
-    i=0
-    for row in reader:
-        i+=1
-        print(i)
-        if row[0] != "question_id":
-            _, created = Poll.objects.get_or_create(
-                question_id=row[0],
-                poll_id=row[1],
-                cycle=row[2],
-                state=row[3],
-                pollster_id=row[4],
-                pollster=row[5],
-                sponsor_ids=row[6],
-                sponsors=row[7],
-                display_name=row[8],
-                pollster_rating_id=row[9],
-                pollster_rating_name=row[10],
-                fte_grade=row[11],
-                sample_size=row[12],
-                population=row[13],
-                population_full=row[14],
-                methodology=row[15],
-                office_type=row[16],
-                start_date=convertDateField(row[17]),
-                end_date=convertDateField(row[18]),
-                sponsor_candidate=row[19],
-                internal=row[20],
-                partisan=row[21], 
-                tracking=row[22],
-                nationwide_batch=row[23],
-                created_at=convertingdatetimefield(row[24]),
-                notes=row[25],
-                url=row[26],
-                stage=row[27],
-                party=row[28],
-                answer=row[29],
-                candidate_id=row[30],
-                candidate_name=row[31],
-                pct=row[32]
-            )
-'''
+                )'''

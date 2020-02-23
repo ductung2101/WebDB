@@ -221,14 +221,17 @@ class PollJSONView(BaseLineChartView):
 
 class GDeltAnalysisPlot:
     def __init__(self, start_date=None, end_date=None, selected_candidates=None, selected_series=None):
+
         qs = Media.pdobjects.all()
         self.date_filtered_df = qs.to_dataframe()
+
         if start_date is not None and end_date is not None:
             # change type of start_date to be same type with Media.date
             start_date_new = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
             end_date_new = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
             mask = (self.date_filtered_df['date'] > start_date_new) & (self.date_filtered_df['date'] <= end_date_new)
             self.date_filtered_df = self.date_filtered_df.loc[mask]
+
 
         self.date_filtered_df["pct"] = self.date_filtered_df["pct"].astype(float)
         self.date_filtered_df["value"] = self.date_filtered_df["value"].astype(float)
@@ -354,7 +357,8 @@ class MainPageView(FormView):
 
         start_date, end_date = parse_daterange(form["daterange"].value())
 
-        plot_data = GDeltAnalysisPlot(start_date, end_date)
+        candidates = ['Bennet','Bloomberg']
+        plot_data = GDeltAnalysisPlot(start_date, end_date, candidates)
 
         # make heatmap
         context['heatmap'] = plot_data.make_heatmap()
