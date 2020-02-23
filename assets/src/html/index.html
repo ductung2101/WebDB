@@ -38,16 +38,15 @@
 			<form/>
 		</div>
 	</header>
-		<div class="container">
-			<div id="intro">
-				<div class="timestap-container">
-					<p class="timestap" id="timestamp">
-					</p>
-				</div>
-				<h1>Dashboard</h1>
-				<h2>Placeholder</h2>
-				<h3>Here we should write some cool introduction.</h3>
+	<div class="container">
+		<div id="intro">
+			<div class="timestap-container">
+				<p class="timestap" id="timestamp">
+				</p>
 			</div>
+			<h1>Dashboard</h1>
+			<h2>Placeholder</h2>
+			<h3>Here we should write some cool introduction.</h3>
 		</div>
 		<table class="container" id="corr_data">
 			{{ corr_table | safe }}
@@ -98,8 +97,8 @@
 });
 </script>
 
-{% comment %} script for timestamp processing {% endcomment %}
 <script>
+	// script for timestamp processing
 	var currentDate = new Date().toLocaleDateString('de-DE', {
 		day : 'numeric',
 		month : 'short',
