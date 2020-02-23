@@ -1,0 +1,219 @@
+{% load staticfiles %}
+{% load render_bundle from webpack_loader %}
+{% load sass_tags %}
+<!doctype html>
+<html lang="en">
+  <head>
+  	<title>Sidebar 08</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+		
+		{% comment %} <link rel="stylesheet" href={% static 'src/css/style.css'%}> {% endcomment %}
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900" rel="stylesheet">
+
+    {{ form.media.css }}
+    {% render_bundle 'main' %}
+
+    <link href="{% sass_src 'src/scss/style.scss' %}" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <header id="myHeader">
+      <div id="title">Web DB App</div>
+    </header>
+		
+		<div class="container d-md-flex align-items-stretch">
+      <!-- Page Content  -->
+      <div id="content" class="p-4 p-md-5 pt-5">
+        <h2 class="mb-4">Dashboard</h2>
+				<div class="timestap-container">
+					<p class="timestap" id="timestamp">
+					</p>
+				</div>
+        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+        <div class="container d-md-flex align-items-stretch">
+          <canvas id="myBigChart" width="768" height="400"></canvas>
+        </div>
+        <p>The most significant negative correlation occurred between {{cor_min_series | safe}} and {{cor_min_candidate | safe}} with the value: {{cor_min_val | safe}}</p>
+        <p>The most significant positive correlation occurred between {{cor_max_series | safe}} and {{cor_max_candidate | safe}} with the value: {{cor_max_val | safe}}</p>
+        <div class="container no-gutters d-md-flex align-items-stretch" id="gdelt_heatmap">
+          {{heatmap | safe}}
+        </div>
+        <div class="container no-gutters d-md-flex align-items-stretch" id="gdelt_scatter">
+          {{scatter|safe}}
+        </div>
+        <div class="container no-gutters d-md-flex align-items-stretch" id="gdelt_radar">
+          {{radar|safe}}
+        </div>
+      </div>
+
+      <nav id="sidebar">
+				<div class="p-4 pt-5" id="sidebar-content">
+          <div id="form" class="mb-5">
+	        	<h5>Filters</h5>
+            <form action='/polls/main_page' method="post" class="subscribe-form">
+              {% csrf_token %}
+              <div class="form-group d-flex">
+                {{ form.daterange.errors }}
+                {% comment %} {{ form.daterange.label_tag }} {% endcomment %}
+                {{ form.daterange }}
+              </div>
+              <div class="form-group d-flex">
+                {{ form.candidates.errors }}
+                {% comment %} {{ form.candidates.label_tag }} {% endcomment %}
+                {{ form.candidates }}
+              </div>
+              <div class="form-group">
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </div>
+            <form/>
+          </div>
+					<h5>Categories</h5>
+	        <ul class="list-unstyled components mb-5">
+	          <li>
+	            <a href="#pageSubmenu1" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Mens Shoes</a>
+	            <ul class="collapse list-unstyled" id="pageSubmenu1">
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Casual</a></li>
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Football</a></li>
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Jordan</a></li>
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Lifestyle</a></li>
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Running</a></li>
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Soccer</a></li>
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Sports</a></li>
+	            </ul>
+	          </li>
+	          <li>
+	            <a href="#pageSubmenu2" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Mens Shoes</a>
+	            <ul class="collapse list-unstyled" id="pageSubmenu2">
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Casual</a></li>
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Football</a></li>
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Jordan</a></li>
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Lifestyle</a></li>
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Running</a></li>
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Soccer</a></li>
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Sports</a></li>
+	            </ul>
+	          </li>
+	          <li>
+	            <a href="#pageSubmenu3" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Accessories</a>
+	            <ul class="collapse list-unstyled" id="pageSubmenu3">
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Nicklace</a></li>
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Ring</a></li>
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Bag</a></li>
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Sacks</a></li>
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Lipstick</a></li>
+	            </ul>
+	          </li>
+	          <li>
+	            <a href="#pageSubmenu4" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Clothes</a>
+	            <ul class="collapse list-unstyled" id="pageSubmenu4">
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Jeans</a></li>
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> T-shirt</a></li>
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Jacket</a></li>
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Shoes</a></li>
+                <li><a href="#"><span class="fa fa-chevron-right mr-2"></span> Sweater</a></li>
+	            </ul>
+	          </li>
+	        </ul>
+					<div class="mb-5">
+						<h5>Tag Cloud</h5>
+            <div class="tagcloud">
+              <a href="#" class="tag-cloud-link">dish</a>
+              <a href="#" class="tag-cloud-link">menu</a>
+              <a href="#" class="tag-cloud-link">food</a>
+              <a href="#" class="tag-cloud-link">sweet</a>
+              <a href="#" class="tag-cloud-link">tasty</a>
+              <a href="#" class="tag-cloud-link">delicious</a>
+              <a href="#" class="tag-cloud-link">desserts</a>
+              <a href="#" class="tag-cloud-link">drinks</a>
+            </div>
+					</div>
+	      </div>
+    	</nav>
+		</div>
+
+    {% comment %} <script src={% static "src/js/jquery.min.js" %}></script> {% endcomment %}
+    {% comment %} <script src={% static "src/js/popper.js" %}></script> {% endcomment %}
+    {% comment %} <script src={% static "src/js/bootstrap.min.js" %}></script> {% endcomment %}
+    {% comment %} <script src={% static "src/js/main.js" %}></script> {% endcomment %}
+  </body>
+
+
+
+
+<script>
+	// functionality for the date range picker
+	$(function() {
+		$('input[name="daterange"]').daterangepicker({
+			opens: 'right'
+		});
+});
+</script>
+
+{% comment %} script for timestamp processing {% endcomment %}
+<script>
+	var currentDate = new Date().toLocaleDateString('de-DE', {
+		day : 'numeric',
+		month : 'short',
+		year : 'numeric',
+		hour: '2-digit',
+		minute: '2-digit',
+	});
+	var ts = "Updated " + currentDate
+	document.getElementById("timestamp").innerHTML = ts
+	console.log(ts)
+</script>
+
+<script type="text/javascript">
+  // do initial charting
+  var daterange = $('#id_daterange').get(0).value
+  console.log(daterange)
+  $.ajax({
+    type:"POST",
+    url: '{% url "poll_json_post" %}',
+    data: {'daterange': daterange,
+        'csrfmiddlewaretoken': '{{ csrf_token }}',
+    },
+    success: function(data) {
+      var ctx = $("#myBigChart").get(0).getContext("2d");
+      bigChart = new Chart(ctx, {
+        type: 'line', data: data
+      });
+    },
+  });
+</script>
+
+<script>
+	// When the user scrolls the page, execute myFunction
+	window.onscroll = function() {myFunction()};
+
+	// Get the header
+	var header = document.getElementById("myHeader");
+	var sidebar = document.getElementById("sidebar");
+
+	// Get the offset position of the navbar
+	var stickyH = header.offsetTop;
+	var stickyS = sidebar.offsetTop;
+
+	// Add the sticky class to the header when you reach its scroll position. Remove "sticky" when you leave the scroll position
+	function myFunction() {
+		if (window.pageYOffset > stickyS) {
+			sidebar.classList.add("sticky");
+		} else {
+			sidebar.classList.remove("sticky");
+		}
+
+		if (window.pageYOffset > stickyH) {
+			header.classList.add("sticky");
+		} else {
+			header.classList.remove("sticky");
+		}
+	}
+</script>
+
+{{ form.media.js }}
+
+</html>

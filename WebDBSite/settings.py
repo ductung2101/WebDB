@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'webpack_loader',
     'bootstrap_select.apps.BootstrapSelectConfig',
     'django_select2',
+    'sass_processor',
 ]
 
 MIDDLEWARE = [
@@ -61,7 +62,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'APP_DIRS': True,
-        'DIRS': [os.path.join(BASE_DIR, 'assets', 'src', 'html')],
+        'DIRS': [os.path.join(BASE_DIR, 'assets', 'src')],
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -127,7 +128,17 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'assets'),
+    os.path.join(BASE_DIR, 'assets'),
 )
+
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'sass_processor.finders.CssFinder',
+]
+
+# Django Sass
+SASS_PROCESSOR_ROOT = os.path.join(BASE_DIR,'assets')
 
 # Configure webpack loader
 WEBPACK_LOADER = {
