@@ -134,7 +134,7 @@ a {
   text-decoration: none;
   background-color: transparent; }
   a:hover {
-    color: #0056b3;
+    color: #808080;
     text-decoration: underline; }
 
 a:not([href]):not([tabindex]) {
@@ -6984,7 +6984,7 @@ body {
 
 a {
   transition: .3s all ease;
-  color: #fc7fb2; }
+  color: #000; }
   a:hover, a:focus {
     text-decoration: none !important;
     outline: none !important;
@@ -7065,7 +7065,7 @@ h1, h2, h3, h4, h5,
         color: #fff; }
     #sidebar ul li.active > a {
       background: transparent;
-      color: #fc7fb2; }
+      color: #000; }
   @media (max-width: 767.98px) {
     #sidebar {
       min-width: 100%;
@@ -7101,7 +7101,7 @@ h1, h2, h3, h4, h5,
           bottom: 0;
           content: '';
           transform: rotate(45deg);
-          background: #fc7fb2;
+          background: #000;
           border-radius: 10px; }
         #sidebar .custom-menu .btn.btn-primary:hover, #sidebar .custom-menu .btn.btn-primary:focus {
           background: transparent !important;
@@ -7124,11 +7124,11 @@ a[data-toggle="collapse"] {
   transition: all 0.3s; }
 
 .btn.btn-primary {
-  background: #fc7fb2;
-  border-color: #fc7fb2; }
+  background: #000;
+  border-color: #000; }
   .btn.btn-primary:hover, .btn.btn-primary:focus {
-    background: #fc7fb2 !important;
-    border-color: #fc7fb2 !important; }
+    background: #000 !important;
+    border-color: #000 !important; }
 
 .footer p {
   color: rgba(255, 255, 255, 0.5); }
@@ -7144,8 +7144,8 @@ a[data-toggle="collapse"] {
   border: 1px solid #ccc;
   font-size: 11px; }
   .tagcloud a:hover {
-    border-color: #fc7fb2;
-    background: #fc7fb2;
+    border-color: #000;
+    background: #000;
     color: #fff; }
 
 .form-control {

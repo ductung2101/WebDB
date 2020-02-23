@@ -17,10 +17,8 @@ header {
 	height: 150px
 }
 
-#title {
-	line-height: 40px;
-	padding: 0 15px;
-	font-family: AtlasGrotesk,"Helvetica Neue",Helvetica,Arial,sans-serif
+#toolbar {
+	padding-left: 3rem
 }
 
 #id_candidates {
@@ -86,7 +84,6 @@ h1, h2 {
 	margin: 0 15px;
 	
 }
-
 
 table {
 	background-color: #fafafa;

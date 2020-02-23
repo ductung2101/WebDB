@@ -46,7 +46,7 @@ def auto_update_president_polls():
     r = requests.get(url, allow_redirects=True)
     open('polls\\new_file.csv', 'wb').write(r.content)
     temp = pd.read_csv('polls\\new_file.csv', sep=',', quotechar='"')
-    with open('polls\\new_file.csv', 'r') as csv_file:
+    with open('polls\\new_file.csv', 'r', encoding="utf8") as csv_file:
         reader = csv.reader(csv_file, delimiter=',', quotechar='"')
         header = next(reader)
         total_row_new_record = sum(1 for line in csv_file)
