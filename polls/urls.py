@@ -13,6 +13,7 @@ urlpatterns = [
     #path('gdelt_heatmap/<str:start_date>/<str:end_date>', views.gdelt_heatmap_view, name='gdelt_heatmap_view'),
     #path('gdelt_heatmap', views.gdelt_heatmap_view, name='gdelt_heatmap_view_post'),
     path('main_page', views.main_page, name='main_page'),
+    path('candidate', views.candidate, name='candidate'),
 ]
 
 dataloader = data.DataLoader()

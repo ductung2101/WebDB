@@ -20,6 +20,7 @@ from polls.data import DataLoader
 from polls.updatedb import auto_update_president_polls
 from polls.util import parse_daterange
 
+
 # Create your views here.
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
@@ -30,13 +31,14 @@ def sub(request):
     html = "<html><body>It is now %s.</body></html>" % now
     return HttpResponse(html)
 
+
 class PollJSONView(BaseLineChartView):
     def post(self, request, *args, **kwargs):
         form = DateForm(request.POST)
         start_date, end_date = parse_daterange(form["daterange"].value())
         candidates = form["candidates"].value()[0]
         return redirect('poll_json', start_date=start_date, end_date=end_date,
-            candidates = candidates)
+                        candidates=candidates)
 
     def do_compute(self):
         self.n_weeks = self.kwargs.get('n_weeks')
@@ -45,7 +47,7 @@ class PollJSONView(BaseLineChartView):
         self.end_date = pytz.utc.localize(datetime.datetime.strptime(
             self.kwargs.get('end_date'), "%Y-%m-%d"))
         self.candidates = self.kwargs.get('candidates').split('-')
-        print ("Plot based on", self.candidates)
+        print("Plot based on", self.candidates)
 
         self.df = DataLoader.instance().get_polls()
         self.df["pct"] = self.df["pct"].astype(float)
@@ -100,13 +102,13 @@ class GDeltAnalysisPlot:
             self.candidates = self.date_filtered_df["candidate"].unique()
         else:
             self.candidates = selected_candidates
-        print ("Rendering for candidates", self.candidates, "from query", selected_candidates)
+        print("Rendering for candidates", self.candidates, "from query", selected_candidates)
 
         if selected_series is None:
             self.series = self.date_filtered_df["series"].unique()
         else:
             self.series = selected_series
-        print ("Rendering for series", self.series)
+        print("Rendering for series", self.series)
 
         self.min_cor = 2
         self.min_cand = None
@@ -149,7 +151,7 @@ class GDeltAnalysisPlot:
                                  i, j] is not None else 'There is not enough data to calculate correlation'
                           for j in range(len(self.candidates))]
                          )
-        zero_pos = abs(self.min_cor)/(abs(self.min_cor) + abs(self.max_cor))
+        zero_pos = abs(self.min_cor) / (abs(self.min_cor) + abs(self.max_cor))
         hm = go.Heatmap(
             z=self.cor_mat.values,
             x=self.candidates,
@@ -249,8 +251,51 @@ class MainPageView(FormView):
         return super().get(form)
 
 
+class CandidatePageView(FormView):
+    template_name = 'candidate.html'
+    form_class = DateForm
+    success_url = '.'
+
+    # add items to the context
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # get the elements from the form
+        form = super().get_form()
+        print(form["candidates"].value())
+        start_date, end_date = parse_daterange(form["daterange"].value())
+        candidates = form["candidates"].value()
+
+        plot_data = GDeltAnalysisPlot(start_date, end_date, candidates)
+
+        # make heatmap
+        context['heatmap'] = plot_data.make_heatmap()
+
+        # make radar
+        context['radar'] = plot_data.make_radar_chart()
+
+        # make scatter
+        context['scatter'] = plot_data.make_scatter_plot()
+
+        # make corr matrix
+        context['corr_table'] = plot_data.cor_mat.to_html
+
+        # get minmax data
+        context['cor_min_val'] = plot_data.min_cor
+        context['cor_min_candidate'] = plot_data.min_cand
+        context['cor_min_series'] = plot_data.min_ser
+        context['cor_max_val'] = plot_data.max_cor
+        context['cor_max_candidate'] = plot_data.max_cand
+        context['cor_max_series'] = plot_data.max_ser
+
+        return context
+
+    def form_valid(self, form):
+        return super().get(form)
+
 auto_update_president_polls()
 main_page = MainPageView.as_view()
+candidate = CandidatePageView.as_view()
 poll_json_view = PollJSONView.as_view()
 # correlation_view = CorrelationView.as_view()
 # gdelt_heatmap_view = GDeltAnalysisPlotView.as_view()
