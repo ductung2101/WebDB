@@ -10,10 +10,18 @@ CANDIDATES=(
 )
 
 class DateForm(forms.Form):
-    daterange = forms.CharField(label='Date Range', initial='01.04.2019 - 01.08.2019')
+    daterange = forms.CharField(
+        label='Date Range', 
+        initial='01.04.2019 - 01.08.2019',
+        widget=forms.TextInput(
+            attrs={'class': 'form-control'}
+        )
+    )
     candidates = forms.MultipleChoiceField(
         choices=CANDIDATES,
-        widget = Select2MultipleWidget)
+        widget = Select2MultipleWidget(
+            attrs={'class': 'form-control'}
+        ))
         # widget=forms.CheckboxSelectMultiple()
     # candidates = forms.CharField(label = "Candidates", 
     #     widget = BootstrapSelect(
