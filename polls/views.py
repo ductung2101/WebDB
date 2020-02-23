@@ -149,11 +149,12 @@ class GDeltAnalysisPlot:
                                  i, j] is not None else 'There is not enough data to calculate correlation'
                           for j in range(len(self.candidates))]
                          )
+        zero_pos = abs(self.min_cor)/(abs(self.min_cor) + abs(self.max_cor))
         hm = go.Heatmap(
             z=self.cor_mat.values,
             x=self.candidates,
             y=self.series,
-            colorscale=["red", "white", "green"],
+            colorscale=[(0, "red"), (zero_pos, "white"), (1, "green")],
             text=hover,
             hoverinfo='text')
 
