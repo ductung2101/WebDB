@@ -73,11 +73,13 @@
 	        	<h5>Filters</h5>
             <form action='/polls/main_page' method="post" class="subscribe-form">
               {% csrf_token %}
+              Dates:
               <div class="form-group d-flex">
                 {{ form.daterange.errors }}
                 {% comment %} {{ form.daterange.label_tag }} {% endcomment %}
                 {{ form.daterange }}
               </div>
+              Candidates:
               <div class="form-group d-flex">
                 {{ form.candidates.errors }}
                 {% comment %} {{ form.candidates.label_tag }} {% endcomment %}
@@ -187,11 +189,13 @@
 <script type="text/javascript">
   // do initial charting
   var daterange = $('#id_daterange').get(0).value
-  console.log(daterange)
+  var candidates = $('#id_candidates').val().join('-')
+  console.log(daterange, candidates)
   $.ajax({
     type:"POST",
     url: '{% url "poll_json_post" %}',
     data: {'daterange': daterange,
+        'candidates': candidates,
         'csrfmiddlewaretoken': '{{ csrf_token }}',
     },
     success: function(data) {

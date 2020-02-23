@@ -1,13 +1,16 @@
 from django import forms
+import pdb, numpy
+import pandas as pd
 from bootstrap_select import BootstrapSelect
-from django_select2.forms import Select2MultipleWidget
+from django_select2.forms import Select2MultipleWidget, Select2Widget
 
-CANDIDATES=(
-    (0, 'aabsabdsiad'),
-    (1, 'bsdiasjdasdamsd'),
-    (2, 'c'),
-    (3, 'd'),
-)
+from polls.models import Poll, Media
+from polls.data import DataLoader
+
+qs = Media.pdobjects.all().to_dataframe()
+candidate_list = qs['candidate'].unique()
+CANDIDATES=zip(candidate_list,candidate_list)
+
 
 class DateForm(forms.Form):
     daterange = forms.CharField(
@@ -17,11 +20,27 @@ class DateForm(forms.Form):
             attrs={'class': 'form-control'}
         )
     )
+
     candidates = forms.MultipleChoiceField(
         choices=CANDIDATES,
         widget = Select2MultipleWidget(
             attrs={'class': 'form-control'}
-        ))
+        )
+    )
+
+    # outlets = forms.MultipleChoiceField(
+    #     choices=CANDIDATES,
+    #     widget = Select2MultipleWidget(
+    #         attrs={'class': 'form-control'}
+    #     )
+    # )
+
+    # state = forms.ChoiceField(
+    #     choices=STATES,
+    #     widget = Select2Widget(
+    #         attrs={'class': 'form-control'}
+    #     )
+    # )
         # widget=forms.CheckboxSelectMultiple()
     # candidates = forms.CharField(label = "Candidates", 
     #     widget = BootstrapSelect(

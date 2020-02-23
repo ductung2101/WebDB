@@ -68,6 +68,11 @@ h1, h2, h3, h4, h5,
 	background-position: center center;
 }
 
+// SELECT2
+.select2-container {
+	color: $black;
+}
+
 
 //SIDEBAR
 .wrapper {
@@ -84,7 +89,7 @@ h1, h2, h3, h4, h5,
   min-width: 270px;
   max-width: 270px;
   // background: $primary;
-  color: #fff;
+//   color: #fff;
   transition: all 0.3s;
   position: relative;
   z-index: 0;
