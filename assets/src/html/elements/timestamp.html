@@ -1,0 +1,17 @@
+<div class="timestap-container">
+    <p class="timestap" id="timestamp">
+    </p>
+    <script>
+        // script for timestamp processing
+        var currentDate = new Date().toLocaleDateString('de-DE', {
+            day : 'numeric',
+            month : 'short',
+            year : 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+        var ts = "Updated " + currentDate
+        document.getElementById("timestamp").innerHTML = ts
+        console.log(ts)
+    </script>
+</div>

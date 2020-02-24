@@ -13,7 +13,7 @@ from django.shortcuts import redirect
 from django.views.generic import FormView
 from plotly.offline import plot
 
-from polls.forms import DateForm
+from polls.forms import CandidatesForm, NationalForm, OutletsForm
 
 from polls.data import DataLoader
 from polls.updatedb import auto_update_president_polls
@@ -33,7 +33,7 @@ def sub(request):
 
 class PollJSONView(BaseLineChartView):
     def post(self, request, *args, **kwargs):
-        form = DateForm(request.POST)
+        form = NationalForm(request.POST)
         start_date, end_date = parse_daterange(form["daterange"].value())
         candidates = form["candidates"].value()[0]
         if len(candidates) == 0:
@@ -211,7 +211,7 @@ class GDeltAnalysisPlot:
 
 class MainPageView(FormView):
     template_name = 'index.html'
-    form_class = DateForm
+    form_class = NationalForm
     success_url = '.'
 
     # add items to the context
@@ -254,7 +254,7 @@ class MainPageView(FormView):
 
 class CandidatePageView(FormView):
     template_name = 'candidate.html'
-    form_class = DateForm
+    form_class = CandidatesForm
     success_url = '.'
 
     # add items to the context
@@ -263,31 +263,6 @@ class CandidatePageView(FormView):
 
         # get the elements from the form
         form = super().get_form()
-        print(form["candidates"].value())
-        start_date, end_date = parse_daterange(form["daterange"].value())
-        candidates = form["candidates"].value()
-
-        plot_data = GDeltAnalysisPlot(start_date, end_date, candidates)
-
-        # make heatmap
-        context['heatmap'] = plot_data.make_heatmap()
-
-        # make radar
-        context['radar'] = plot_data.make_radar_chart()
-
-        # make scatter
-        context['scatter'] = plot_data.make_scatter_plot()
-
-        # make corr matrix
-        context['corr_table'] = plot_data.cor_mat.to_html
-
-        # get minmax data
-        context['cor_min_val'] = plot_data.min_cor
-        context['cor_min_candidate'] = plot_data.min_cand
-        context['cor_min_series'] = plot_data.min_ser
-        context['cor_max_val'] = plot_data.max_cor
-        context['cor_max_candidate'] = plot_data.max_cand
-        context['cor_max_series'] = plot_data.max_ser
 
         return context
 

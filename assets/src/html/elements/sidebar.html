@@ -1,0 +1,37 @@
+<nav id="sidebar">
+    <div class="p-4 pt-5" id="sidebar-content">
+        <div id="form" class="mb-5">
+            <h5>Filters</h5>
+            <form action='/polls/main_page' method="post" class="subscribe-form">
+                {% csrf_token %}
+                Dates:
+                <div class="form-group d-flex">
+                    {{ form.daterange.errors }}
+                    {% comment %} {{ form.daterange.label_tag }} {% endcomment %}
+                    {{ form.daterange }}
+                </div>
+                State:
+                <div class="form-group d-flex">
+                    {{ form.state.errors }}
+                    {% comment %} {{ form.candidates.label_tag }} {% endcomment %}
+                    {{ form.state }}
+                </div>
+                Candidates:
+                <div class="form-group d-flex">
+                    {{ form.candidates.errors }}
+                    {% comment %} {{ form.candidates.label_tag }} {% endcomment %}
+                    {{ form.candidates }}
+                </div>
+                Outlets:
+                <div class="form-group d-flex">
+                    {{ form.outlets.errors }}
+                    {% comment %} {{ form.candidates.label_tag }} {% endcomment %}
+                    {{ form.outlets }}
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            <form/>
+        </div>
+    </div>
+</nav>
