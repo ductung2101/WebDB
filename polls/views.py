@@ -19,18 +19,6 @@ from polls.data import DataLoader
 from polls.updatedb import auto_update_president_polls
 from polls.util import parse_daterange
 
-
-# Create your views here.
-def index(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
-
-
-def sub(request):
-    now = datetime.datetime.now()
-    html = "<html><body>It is now %s.</body></html>" % now
-    return HttpResponse(html)
-
-
 class PollJSONView(BaseLineChartView):
     def post(self, request, *args, **kwargs):
         form = NationalForm(request.POST)
@@ -42,36 +30,21 @@ class PollJSONView(BaseLineChartView):
                         candidates=candidates)
 
     def do_compute(self):
-        self.n_weeks = self.kwargs.get('n_weeks')
-        self.start_date = pytz.utc.localize(datetime.datetime.strptime(
-            self.kwargs.get('start_date'), "%Y-%m-%d"))
-        self.end_date = pytz.utc.localize(datetime.datetime.strptime(
-            self.kwargs.get('end_date'), "%Y-%m-%d"))
         self.candidates = self.kwargs.get('candidates').split('-')
-        print("Plot based on", self.candidates)
+        self.df = DataLoader.instance().get_polls(
+            self.kwargs.get('start_date'),
+            self.kwargs.get('end_date'),
+            self.candidates
+        )
 
-        self.df = DataLoader.instance().get_polls()
-        self.df["pct"] = self.df["pct"].astype(float)
-        self.df["create_date"] = pd.to_datetime(self.df["created_at"],
-                                                infer_datetime_format=True)
-        self.df["create_week"] = (self.df['create_date'] - pd.to_timedelta( \
-            self.df['create_date'].dt.dayofweek, unit='d') + np.timedelta64(7, 'D')) \
-            .dt.normalize()
-        # TODO: insert better filtering here
-        self.df_subset = self.df[self.df["party"] == "DEM"]
-        # import pdb; pdb.set_trace()
-        self.df_pivot = self.df_subset.pivot_table(
+        self.df_pivot = self.df.pivot_table(
             values="pct", index="create_week", columns="answer",
-            aggfunc=np.mean).fillna(0)  # .iloc[-self.n_weeks:]
-        self.df_pivot = self.df_pivot[
-            (self.df_pivot.index <= self.end_date) &
-            (self.df_pivot.index >= self.start_date)]
-        # import pdb; pdb.set_trace()
+            aggfunc=np.mean).fillna(0)
 
     def get_labels(self):
         self.do_compute()
         """Return n_weeks labels for the x-axis."""
-        return list(self.df_pivot.index.strftime("%d.%m.%Y"))
+        return list(self.df_pivot.index)
 
     def get_providers(self):
         """Return names of selected candidates."""
@@ -86,19 +59,52 @@ class PollJSONView(BaseLineChartView):
         return lst_selected
 
 
+class CoverageJSONView(BaseLineChartView):
+    def post(self, request, *args, **kwargs):
+        form = NationalForm(request.POST)
+        start_date, end_date = parse_daterange(form["daterange"].value())
+        candidates = form["candidates"].value()[0]
+        if len(candidates) == 0:
+            candidates = "-".join(DataLoader.instance().get_candidate_list())
+        outlets = form["outlets"].value()[0]
+        if len(outlets) == 0:
+            outlets = "-".join(DataLoader.instance().get_outlets_list())
+        return redirect('cov_json', start_date=start_date, end_date=end_date,
+                        candidates=candidates, series=outlets)
+
+    def do_compute(self):
+        self.candidates = self.kwargs.get('candidates').split('-')
+        self.series = self.kwargs.get('series').split('-')
+        self.df = DataLoader.instance().get_media(
+            self.kwargs.get('start_date'),
+            self.kwargs.get('end_date'),
+            self.candidates,
+            self.series
+        )
+
+        self.df_pivot = self.df.pivot_table(
+            values="value", index="create_week", columns="answer",
+            aggfunc=np.mean).fillna(0)
+
+    def get_labels(self):
+        self.do_compute()
+        """Return n_weeks labels for the x-axis."""
+        return list(self.df_pivot.index)
+
+    def get_providers(self):
+        """Return names of selected candidates."""
+        return self.candidates
+
+    def get_data(self):
+        """Return timeseries to plot for each candidate."""
+        can_selected = self.get_providers()
+        lst_selected = []
+        for can in can_selected:
+            lst_selected.append(list(self.df_pivot[can]))
+        return lst_selected
+
 class GDeltAnalysisPlot:
     def __init__(self, start_date=None, end_date=None, selected_candidates=[], selected_series=None):
-        self.date_filtered_df = DataLoader.instance().get_media()
-        if start_date is not None and end_date is not None:
-            # change type of start_date to be same type with Media.date
-            start_date_new = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
-            end_date_new = datetime.datetime.strptime(end_date, '%Y-%m-%d').date()
-            mask = (self.date_filtered_df['date'] > start_date_new) & (self.date_filtered_df['date'] <= end_date_new)
-            self.date_filtered_df = self.date_filtered_df.loc[mask]
-
-        self.date_filtered_df["pct"] = self.date_filtered_df["pct"].astype(float)
-        self.date_filtered_df["value"] = self.date_filtered_df["value"].astype(float)
-
         if selected_candidates is None or len(selected_candidates) == 0:
             self.candidates = DataLoader.instance().get_candidate_list()
         else:
@@ -110,6 +116,9 @@ class GDeltAnalysisPlot:
         else:
             self.series = selected_series
         print("Rendering for series", self.series)
+
+        self.date_filtered_df = DataLoader.instance().get_media(start_date, end_date,
+            self.candidates, self.series)
 
         self.min_cor = 2
         self.min_cand = None
@@ -273,5 +282,6 @@ class CandidatePageView(FormView):
 main_page = MainPageView.as_view()
 candidate = CandidatePageView.as_view()
 poll_json_view = PollJSONView.as_view()
+cov_json_view = CoverageJSONView.as_view()
 # correlation_view = CorrelationView.as_view()
 # gdelt_heatmap_view = GDeltAnalysisPlotView.as_view()

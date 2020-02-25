@@ -29,8 +29,11 @@
         <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
         <div class="container d-md-flex align-items-stretch">
-          <canvas id="myBigChart" width="768" height="400"></canvas>
+          <canvas id="pollChart" width="768" height="400"></canvas>
         </div>
+        <div class="container d-md-flex align-items-stretch">
+          <canvas id="covChart" width="768" height="400"></canvas>
+        </div
         <p>The most significant negative correlation occurred between {{cor_min_series | safe}} and {{cor_min_candidate | safe}} with the value: {{cor_min_val | safe}}</p>
         <p>The most significant positive correlation occurred between {{cor_max_series | safe}} and {{cor_max_candidate | safe}} with the value: {{cor_max_val | safe}}</p>
         <div class="container no-gutters d-md-flex align-items-stretch" id="gdelt_heatmap">
@@ -89,6 +92,28 @@
 });
 </script>
 
+<script type="text/javascript">
+  // do initial charting
+  var daterange = $('#id_daterange').get(0).value
+  var candidates = $('#id_candidates').val().join('-')
+  var outlets = $('#id_outlets').val().join('-')
+  console.log(daterange, candidates, outlets)
+  $.ajax({
+    type:"POST",
+    url: '{% url "cov_json_post" %}',
+    data: {'daterange': daterange,
+        'candidates': candidates,
+        'outlets': outlets,
+        'csrfmiddlewaretoken': '{{ csrf_token }}',
+    },
+    success: function(data) {
+      var ctx = $("#covChart").get(0).getContext("2d");
+      bigChart = new Chart(ctx, {
+        type: 'line', data: data
+      });
+    },
+  });
+</script>
 
 <script type="text/javascript">
   // do initial charting
@@ -103,7 +128,7 @@
         'csrfmiddlewaretoken': '{{ csrf_token }}',
     },
     success: function(data) {
-      var ctx = $("#myBigChart").get(0).getContext("2d");
+      var ctx = $("#pollChart").get(0).getContext("2d");
       bigChart = new Chart(ctx, {
         type: 'line', data: data
       });

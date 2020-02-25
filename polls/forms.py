@@ -43,7 +43,6 @@ class NationalForm(forms.Form):
             attrs={'class': 'form-control'}
         )
     )
-
     state = forms.ChoiceField(
         choices=STATES,
         required = False,

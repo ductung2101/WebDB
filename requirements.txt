@@ -25,3 +25,4 @@ statsmodels
 libsass 
 django-compressor 
 django-sass-processor
+plotly
