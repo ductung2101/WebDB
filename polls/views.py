@@ -19,6 +19,7 @@ from polls.data import DataLoader
 from polls.updatedb import auto_update_president_polls
 from polls.util import parse_daterange
 
+
 class PollJSONView(BaseLineChartView):
     def post(self, request, *args, **kwargs):
         form = NationalForm(request.POST)
@@ -103,22 +104,25 @@ class CoverageJSONView(BaseLineChartView):
             lst_selected.append(list(self.df_pivot[can]))
         return lst_selected
 
+
 class GDeltAnalysisPlot:
-    def __init__(self, start_date=None, end_date=None, selected_candidates=[], selected_series=None):
+    def __init__(self, start_date=None, end_date=None, selected_candidates=None, selected_series=None):
+        if selected_candidates is None:
+            selected_candidates = []
         if selected_candidates is None or len(selected_candidates) == 0:
             self.candidates = DataLoader.instance().get_candidate_list()
         else:
             self.candidates = selected_candidates
         print("Rendering for candidates", self.candidates, "from query", selected_candidates)
 
-        if selected_series is None:
+        if selected_series is None or len(selected_series) == 0:
             self.series = DataLoader.instance().get_outlets_list()
         else:
             self.series = selected_series
         print("Rendering for series", self.series)
 
         self.date_filtered_df = DataLoader.instance().get_media(start_date, end_date,
-            self.candidates, self.series)
+                                                                self.candidates, self.series)
 
         self.min_cor = 2
         self.min_cand = None
@@ -177,42 +181,60 @@ class GDeltAnalysisPlot:
         return plot_div
 
     def make_radar_chart(self):
-        series_a = self.date_filtered_df['series'] == 'MSNBC'
-        series_b = self.date_filtered_df['series'] == 'CNN'
-        categories = self.date_filtered_df[series_a]['candidate'][:5]
-        chart_data_a = self.date_filtered_df[series_a].groupby(['candidate'])['value'].agg('mean')[:5]
-        chart_data_b = self.date_filtered_df[series_b].groupby(['candidate'])['value'].agg('mean')[:5]
-        fig = go.Figure()
+        is_outlets_wise = len(self.series) > len(self.candidates)
+        categories = self.series if is_outlets_wise else self.candidates
+        radars = self.candidates if is_outlets_wise else self.series
+        if len(categories) > 6 or len(radars) > 3:
+            return ""
 
-        fig.add_trace(go.Scatterpolar(
-            r=chart_data_a,
-            theta=categories,
-            fill='toself',
-            name='Product A'
-        ))
-        fig.add_trace(go.Scatterpolar(
-            r=chart_data_b,
-            theta=categories,
-            fill='toself',
-            name='Product B'
-        ))
+        chart_data = []
+        if is_outlets_wise:
+            for i in range(len(radars)):
+                current_candidate = self.date_filtered_df['candidate'] == radars[i]
+                chart_data_row = []
+                for j in range(len(categories)):
+                    current_outlet = self.date_filtered_df['series'] == categories[j]
+                    chart_data_row.append(self.date_filtered_df[current_candidate & current_outlet]['value'].mean())
+                chart_data.append(chart_data_row)
+        else:
+            for i in range(len(radars)):
+                current_outlet = self.date_filtered_df['series'] == radars[i]
+                chart_data_row = []
+                for j in range(len(categories)):
+                    current_candidate = self.date_filtered_df['candidate'] == categories[j]
+                    chart_data_row.append(self.date_filtered_df[current_outlet & current_candidate]['value'].mean())
+                chart_data.append(chart_data_row)
+
+        fig = go.Figure()
+        for i in range(len(radars)):
+            fig.add_trace(go.Scatterpolar(
+                r=chart_data[i],
+                theta=categories,
+                fill='toself',
+                name=radars[i]
+            ))
 
         fig.update_layout(
             polar=dict(
                 radialaxis=dict(
-                    visible=True,
-                    range=[0, 1]
+                    visible=True
                 )),
-            showlegend=False
+            showlegend=True
         )
 
         plot_div = plot(fig, output_type='div', include_plotlyjs=True)
         return plot_div
 
     def make_scatter_plot(self):
-        df = self.date_filtered_df[self.date_filtered_df.candidate == 'Warren']
-        df = df[self.date_filtered_df.series == 'FOXNEWS']
-        fig = px.scatter(df, x="value", y="pct", trendline="ols")
+        is_outlets_wise = len(self.series) < len(self.candidates)
+        lines = self.series if is_outlets_wise else self.candidates
+        facets = self.candidates if is_outlets_wise else self.series
+        if len(lines) > 3 or len(facets) > 6:
+            return ""
+        df = self.date_filtered_df[self.date_filtered_df["candidate"].isin(self.candidates)]
+        df = df[self.date_filtered_df["series"].isin(self.series)]
+        fig = px.scatter(df, x="value", y="pct", facet_col= "candidate" if is_outlets_wise else "series",
+                         color = "series" if is_outlets_wise else "candidate", trendline="ols", facet_col_wrap=2)
 
         plot_div = plot(fig, output_type='div', include_plotlyjs=True)
         return plot_div
@@ -232,8 +254,9 @@ class MainPageView(FormView):
         print(form["candidates"].value())
         start_date, end_date = parse_daterange(form["daterange"].value())
         candidates = form["candidates"].value()
+        outlets = form["outlets"].value()
 
-        plot_data = GDeltAnalysisPlot(start_date, end_date, candidates)
+        plot_data = GDeltAnalysisPlot(start_date, end_date, candidates, outlets)
 
         # make heatmap
         context['heatmap'] = plot_data.make_heatmap()
@@ -277,6 +300,7 @@ class CandidatePageView(FormView):
 
     def form_valid(self, form):
         return super().get(form)
+
 
 # auto_update_president_polls()
 main_page = MainPageView.as_view()
