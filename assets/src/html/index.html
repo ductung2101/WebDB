@@ -12,6 +12,8 @@
 		{% comment %} <link rel="stylesheet" href={% static 'src/css/style.css'%}> {% endcomment %}
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900" rel="stylesheet">
+    <link href="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.js"></script>
 
     {{ form.media.css }}
     {% render_bundle 'main' %}
@@ -33,7 +35,8 @@
         </div>
         <div class="container d-md-flex align-items-stretch">
           <canvas id="covChart" width="768" height="400"></canvas>
-        </div
+        </div>
+        <table id='overview_table'></table>
         <p>The most significant negative correlation occurred between {{cor_min_series | safe}} and {{cor_min_candidate | safe}} with the value: {{cor_min_val | safe}}</p>
         <p>The most significant positive correlation occurred between {{cor_max_series | safe}} and {{cor_max_candidate | safe}} with the value: {{cor_max_val | safe}}</p>
         <div class="container no-gutters d-md-flex align-items-stretch" id="gdelt_heatmap">
@@ -86,9 +89,6 @@
 		</div>
   </body>
 
-
-
-
 <script>
 	// functionality for the date range picker
 	$(function() {
@@ -115,7 +115,13 @@
     success: function(data) {
       var ctx = $("#covChart").get(0).getContext("2d");
       bigChart = new Chart(ctx, {
-        type: 'line', data: data
+        type: 'line', data: data,
+        options: {
+          title: {
+            display: true,
+            text: 'Weekly Media Coverage Average (%)'
+          }
+        }
       });
     },
   });
@@ -136,7 +142,13 @@
     success: function(data) {
       var ctx = $("#pollChart").get(0).getContext("2d");
       bigChart = new Chart(ctx, {
-        type: 'line', data: data
+        type: 'line', data: data,
+        options: {
+          title: {
+            display: true,
+            text: 'Weekly Polling Average (%)'
+          }
+        }
       });
     },
   });
@@ -170,6 +182,27 @@
 	}
 </script>
 
+<script type="text/javascript">
+  // load the overview table
+  // var $table = $('#overview_table')
+  $(function() {
+    $('#overview_table').bootstrapTable({
+      striped: true,
+      pagination: true,
+      // showColumns: true,
+      // showToggle: true,
+      // dataSortable : true,
+      showExport: true,
+      sortable: true,
+      paginationVAlign: 'both',
+      pageSize: 10,
+      pageList: [10, 25, 50, 100, 'ALL'],
+      columns: {{ overview_columns|safe }},
+      data: {{ overview_data|safe }},
+      sortName: "pct", sortOrder: "desc",
+    });
+  });
+</script>
 
 
 {{ form.media.js }}

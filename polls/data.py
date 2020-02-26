@@ -24,6 +24,7 @@ class DataLoader:
             DataLoader.__instance = self
 
         # load media data
+        # import pdb; pdb.set_trace()
         self.__media = Media.pdobjects.all().to_dataframe()
         self.__media["pct"] = self.__media["pct"].astype(float)
         self.__media["value"] = self.__media["value"].astype(float)

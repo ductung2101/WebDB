@@ -239,6 +239,23 @@ class GDeltAnalysisPlot:
         plot_div = plot(fig, output_type='div', include_plotlyjs=True)
         return plot_div
 
+def overview_table(start_date, end_date, candidates, series):
+    cols_dict = {
+        'answer' : 'Candidate', 
+        'value' : 'Weekly Coverage Average (%)',
+        'pct' : 'Weekly Polling Average (%)'
+    }
+    dfp = DataLoader.instance().get_polls(start_date, end_date, candidates)
+    dfc = DataLoader.instance().get_media(start_date, end_date, candidates, series)
+    df_agg = dfc.groupby("answer").mean()
+    df_agg["pct"] = dfp.groupby("answer")["pct"].mean()
+    df_agg = df_agg.reset_index()[cols_dict.keys()]
+
+    cols = [{'field' : x, 'title' : cols_dict[x]} for x in df_agg.columns]
+    json = df_agg.to_json(orient='records') 
+    # import pdb; pdb.set_trace()
+    return {'overview_data' : json, 'overview_columns' : cols}
+
 
 class MainPageView(FormView):
     template_name = 'index.html'
@@ -277,6 +294,9 @@ class MainPageView(FormView):
         context['cor_max_val'] = plot_data.max_cor
         context['cor_max_candidate'] = plot_data.max_cand
         context['cor_max_series'] = plot_data.max_ser
+
+        # get data for the overview table
+        context.update(overview_table(start_date, end_date, candidates, outlets))
 
         return context
 
