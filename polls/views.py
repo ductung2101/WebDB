@@ -25,22 +25,26 @@ class PollJSONView(BaseLineChartView):
         form = NationalForm(request.POST)
         start_date, end_date = parse_daterange(form["daterange"].value())
         candidates = form["candidates"].value()[0]
+        state = form["state"].value()
         if len(candidates) == 0:
             candidates = "-".join(DataLoader.instance().get_candidate_list())
         return redirect('poll_json', start_date=start_date, end_date=end_date,
-                        candidates=candidates)
+                        candidates=candidates, state=state)
 
     def do_compute(self):
         self.candidates = self.kwargs.get('candidates').split('-')
         self.df = DataLoader.instance().get_polls(
             self.kwargs.get('start_date'),
             self.kwargs.get('end_date'),
-            self.candidates
+            self.candidates,
+            self.kwargs.get('state'),
         )
 
         self.df_pivot = self.df.pivot_table(
             values="pct", index="create_week", columns="answer",
             aggfunc=np.mean).fillna(0)
+
+        # import pdb; pdb.set_trace()
 
     def get_labels(self):
         self.do_compute()
@@ -106,7 +110,8 @@ class CoverageJSONView(BaseLineChartView):
 
 
 class GDeltAnalysisPlot:
-    def __init__(self, start_date=None, end_date=None, selected_candidates=None, selected_series=None):
+    def __init__(self, start_date=None, end_date=None, state=None, 
+            selected_candidates=None, selected_series=None):
         if selected_candidates is None:
             selected_candidates = []
         if selected_candidates is None or len(selected_candidates) == 0:
@@ -121,8 +126,8 @@ class GDeltAnalysisPlot:
             self.series = selected_series
         print("Rendering for series", self.series)
 
-        self.date_filtered_df = DataLoader.instance().get_media(start_date, end_date,
-                                                                self.candidates, self.series)
+        self.date_filtered_df = DataLoader.instance().get_media(
+            start_date, end_date, self.candidates, self.series)
 
         self.min_cor = 2
         self.min_cand = None
@@ -239,13 +244,13 @@ class GDeltAnalysisPlot:
         plot_div = plot(fig, output_type='div', include_plotlyjs=True)
         return plot_div
 
-def overview_table(start_date, end_date, candidates, series):
+def overview_table(start_date, end_date, state, candidates, series):
     cols_dict = {
         'answer' : 'Candidate', 
         'value' : 'Weekly Coverage Average (%)',
         'pct' : 'Weekly Polling Average (%)'
     }
-    dfp = DataLoader.instance().get_polls(start_date, end_date, candidates)
+    dfp = DataLoader.instance().get_polls(start_date, end_date, candidates, state)
     dfc = DataLoader.instance().get_media(start_date, end_date, candidates, series)
     df_agg = dfc.groupby("answer").mean()
     df_agg["pct"] = dfp.groupby("answer")["pct"].mean()
@@ -272,8 +277,9 @@ class MainPageView(FormView):
         start_date, end_date = parse_daterange(form["daterange"].value())
         candidates = form["candidates"].value()
         outlets = form["outlets"].value()
+        state = form["state"].value()
 
-        plot_data = GDeltAnalysisPlot(start_date, end_date, candidates, outlets)
+        plot_data = GDeltAnalysisPlot(start_date, end_date, state, candidates, outlets)
 
         # make heatmap
         context['heatmap'] = plot_data.make_heatmap()
@@ -296,7 +302,7 @@ class MainPageView(FormView):
         context['cor_max_series'] = plot_data.max_ser
 
         # get data for the overview table
-        context.update(overview_table(start_date, end_date, candidates, outlets))
+        context.update(overview_table(start_date, end_date, state, candidates, outlets))
 
         return context
 

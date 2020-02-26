@@ -131,12 +131,14 @@
   // do initial charting
   var daterange = $('#id_daterange').get(0).value
   var candidates = $('#id_candidates').val().join('-')
-  console.log(daterange, candidates)
+  var state = $('#id_state').get(0).value
+  console.log(daterange, candidates, state)
   $.ajax({
     type:"POST",
     url: '{% url "poll_json_post" %}',
     data: {'daterange': daterange,
         'candidates': candidates,
+        'state': state,
         'csrfmiddlewaretoken': '{{ csrf_token }}',
     },
     success: function(data) {

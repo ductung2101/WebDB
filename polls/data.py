@@ -47,8 +47,11 @@ class DataLoader:
         self.__polls = self.__polls[self.__polls["party"] == "DEM"]
 
 
-    def get_polls(self, start_date = None, end_date = None, candidates = None):
+    def get_polls(self, start_date = None, end_date = None, candidates = None,
+                state = None):
         df = self.__polls
+        if state is not None and state != "National":
+            df = df[df["state"] == state]
         if start_date is not None:
             df = df[df["create_date"] >= start_date]
         if end_date is not None:

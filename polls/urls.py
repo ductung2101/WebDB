@@ -5,7 +5,7 @@ from . import data
 
 urlpatterns = [
     path('', views.main_page, name='index'),
-    path('poll_json/<str:start_date>/<str:end_date>/<str:candidates>', 
+    path('poll_json/<str:start_date>/<str:end_date>/<str:candidates>/<str:state>', 
         views.poll_json_view, name='poll_json'),
     path('poll_json', views.poll_json_view, name='poll_json_post'),
     path('cov_json/<str:start_date>/<str:end_date>/<str:candidates>/<str:series>', 
