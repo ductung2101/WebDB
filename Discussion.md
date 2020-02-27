@@ -33,3 +33,14 @@ Work to be done:
   * The form has to look better, and be validated, etc.
   * The correlation numbers have to be meaningful. Ideally we can also select which candidates we include and which not.
   * Go back to the ideas for plots and all those things that we had and start implementing them, one by one.
+
+27.02.2020
+  To-do list before the final presentation:
+  * Fix all the numbers, display them with only 2 digits. Too many digits now.
+  * Sort out the database according to the plan, and rewrite parts of data.py to use it in an efficient manner. Make sure to keep the same column names, so that no other changes are required downstream for the plots!
+  * Make plots nicer, with maybe color schemes, hover text, titles, labels, etc.
+  * We have a default value for the "state" field in the form. Set decent default values for "Candidates" and "Outlets". My suggestion: hardcode a list of important candidates, for outlets just use all of them (but populate the form field nevertheless).
+  * Right now, in the table, we can see the average percentages across the entire period. Add the growth rate as well, i.e. last_value - first_value of the series. Color it green or red, depending on whether it is positive or negative. It is interesting to see whether candidates are going up or down in polls and media coverage.
+  * There is a raw version of the text for now, but we might want it improved.
+  * Figure out the per-candidate or per-station page. Up to Michal to decide how.
+  * (Optional) Do the about us page.

@@ -250,16 +250,31 @@ def overview_table(start_date, end_date, state, candidates, series):
         'value' : 'Weekly Coverage Average (%)',
         'pct' : 'Weekly Polling Average (%)'
     }
+    return_dict = {}
     dfp = DataLoader.instance().get_polls(start_date, end_date, candidates, state)
     dfc = DataLoader.instance().get_media(start_date, end_date, candidates, series)
     df_agg = dfc.groupby("answer").mean()
     df_agg["pct"] = dfp.groupby("answer")["pct"].mean()
     df_agg = df_agg.reset_index()[cols_dict.keys()]
 
-    cols = [{'field' : x, 'title' : cols_dict[x]} for x in df_agg.columns]
-    json = df_agg.to_json(orient='records') 
-    # import pdb; pdb.set_trace()
-    return {'overview_data' : json, 'overview_columns' : cols}
+    # get polling values, to display in the template.
+    df_agg.sort_values(by = "pct", ascending = False, inplace = True)
+    return_dict["overview_pct_leader"] = df_agg.iloc[0]["answer"]
+    return_dict["overview_pct_runnerup"] = df_agg.iloc[1]["answer"]
+    return_dict["overview_pct_leaderv"] = df_agg.iloc[0]["pct"]
+    return_dict["overview_pct_runnerupv"] = df_agg.iloc[1]["pct"]
+
+    # get media coverage values
+    df_agg.sort_values(by = "value", ascending = False, inplace = True)
+    return_dict["overview_value_leader"] = df_agg.iloc[0]["answer"]
+    return_dict["overview_value_runnerup"] = df_agg.iloc[1]["answer"]
+    return_dict["overview_value_leaderv"] = df_agg.iloc[0]["value"]
+    return_dict["overview_value_runnerupv"] = df_agg.iloc[1]["value"]
+
+    # get table data
+    return_dict["overview_columns"] = [{'field' : x, 'title' : cols_dict[x]} for x in df_agg.columns]
+    return_dict["overview_data"] = df_agg.to_json(orient='records') 
+    return return_dict
 
 
 class MainPageView(FormView):

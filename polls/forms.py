@@ -46,7 +46,7 @@ class NationalForm(forms.Form):
     state = forms.ChoiceField(
         choices=STATES,
         required = False,
-        initial = "",
+        initial = "National",
         widget = Select2Widget(
             attrs={'class': 'form-control'}
         )

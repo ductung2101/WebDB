@@ -27,8 +27,32 @@
       <div id="content" class="p-4 p-md-5 pt-5">
         <h2 class="mb-4">Dashboard</h2>
         {% include "elements/timestamp.html" %}
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+        <p> Welcome to our project dashboard! We aim to present an overview of the
+        ongoing 2020 presidential race, with a focus on the impact of media coverage
+        on polling results.
+        </p>
+
+        <p> This main page shows the current state of the polling and media coverage
+        percentages for each candidate, as well as the developments across the 
+        selected date range. Use the sidebar form to change the date range, 
+        see results for a particular state, filter candidates or media outlets. 
+        </p>
+
+        <h4 class="mb-4"> Overview </h4>
+        <p>The average polling leader over the highlighted period is 
+        <u>{{ overview_pct_leader | safe }}</u> with a polling percentage of
+        <u>{{ overview_pct_leaderv | safe }}%</u>.
+        and the runner-up is <u>{{ overview_pct_runnerup | safe }}</u> with a
+        polling percentage of <u>{{ overview_pct_runnerupv | safe }}</u>
+        respectively.</p>
+
+        <p>Regarding media coverage, the average leader over the same period is 
+        <u>{{ overview_value_leader | safe }}</u>, with a percentage of 
+        <u>{{ overview_value_leaderv | safe }}%</u> of the total airtime,
+        while the runner-up is <u>{{ overview_value_runnerup | safe }}</u>
+        who garnered <u>{{ overview_value_runnerupv | safe }}%</u> of
+        the airtime.</p>
+
 
         <div class="container d-md-flex align-items-stretch">
           <canvas id="pollChart" width="768" height="400"></canvas>
@@ -36,7 +60,10 @@
         <div class="container d-md-flex align-items-stretch">
           <canvas id="covChart" width="768" height="400"></canvas>
         </div>
+        <p>The following table shows statistics computed across the 
+        selected time period.</p>
         <table id='overview_table'></table>
+        <h4 class="mb-4"> Polling Results Corelation with Media Coverage </h4>
         <p>The most significant negative correlation occurred between {{cor_min_series | safe}} and {{cor_min_candidate | safe}} with the value: {{cor_min_val | safe}}</p>
         <p>The most significant positive correlation occurred between {{cor_max_series | safe}} and {{cor_max_candidate | safe}} with the value: {{cor_max_val | safe}}</p>
         <div class="container no-gutters d-md-flex align-items-stretch" id="gdelt_heatmap">
