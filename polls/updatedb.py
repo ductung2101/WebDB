@@ -40,7 +40,7 @@ def auto_update_president_polls():
                     pollster_rating_id=row[9],
                     pollster_rating_name=row[10],
                     fte_grade=row[11],
-                    sample_size=row[12],
+                    sample_size=row[12] if row[12] != '' else 0,
                     population=row[13],
                     population_full=row[14],
                     methodology=row[15],
@@ -60,7 +60,7 @@ def auto_update_president_polls():
                     answer=row[29],
                     candidate_id=row[30],
                     candidate_name=row[31],
-                    pct=row[32]
+                    pct=float(row[32]) if row[32] != '' else 0
                 )
                 if type(created) != bool:
                     created.save()
