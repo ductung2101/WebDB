@@ -36,7 +36,7 @@ Work to be done:
 
 27.02.2020
   To-do list before the final presentation:
-  * Fix all the numbers, display them with only 2 digits. Too many digits now.
+  * Fix all the numbers, display them with only 2 digits. Too many digits now. -DONE
   * Sort out the database according to the plan, and rewrite parts of data.py to use it in an efficient manner. Make sure to keep the same column names, so that no other changes are required downstream for the plots!
   * Make plots nicer, with maybe color schemes, hover text, titles, labels, etc.
   * We have a default value for the "state" field in the form. Set decent default values for "Candidates" and "Outlets". My suggestion: hardcode a list of important candidates, for outlets just use all of them (but populate the form field nevertheless).
