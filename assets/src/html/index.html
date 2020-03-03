@@ -39,19 +39,19 @@
         </p>
 
         <h4 class="mb-4"> Overview </h4>
-        <p>The average polling leader over the highlighted period is 
-        <u>{{ overview_pct_leader | safe }}</u> with a polling percentage of
-        <u>{{ overview_pct_leaderv | safe }}%</u>.
-        and the runner-up is <u>{{ overview_pct_runnerup | safe }}</u> with a
-        polling percentage of <u>{{ overview_pct_runnerupv | safe }}</u>
-        respectively.</p>
+        <p>{{intro_1 | safe}}
+        <u>{{ overview_pct_leader | safe }}</u> {{ intro_2 | safe }}
+        <u>{{ overview_pct_leaderv | safe }}</u>.
+        {{ intro_3 | safe }} <u>{{ overview_pct_runnerup | safe }}</u>
+        {{ intro_4 | safe }} <u>{{ overview_pct_runnerupv | safe }}</u>
+        {{ intro_5 | safe }}</p>
 
-        <p>Regarding media coverage, the average leader over the same period is 
-        <u>{{ overview_value_leader | safe }}</u>, with a percentage of 
-        <u>{{ overview_value_leaderv | safe }}%</u> of the total airtime,
-        while the runner-up is <u>{{ overview_value_runnerup | safe }}</u>
-        who garnered <u>{{ overview_value_runnerupv | safe }}%</u> of
-        the airtime.</p>
+        <p>{{ intro_6 | safe }}
+        <u>{{ overview_value_leader | safe }}</u>{{ intro_7 | safe }}
+        <u>{{ overview_value_leaderv | safe }}</u>{{ intro_8 | safe }}
+        {{ intro_9 | safe }} <u>{{ overview_value_runnerup | safe }}</u>
+        {{ intro_10 | safe }} <u>{{ overview_value_runnerupv | safe }}</u>
+        {{ intro_11 | safe }}</p>
 
 
         <div class="container d-md-flex align-items-stretch">
@@ -63,14 +63,13 @@
         <p>The following table shows statistics computed across the 
         selected time period.</p>
         <table id='overview_table'></table>
-        <h4 class="mb-4"> Polling Results Corelation with Media Coverage </h4>
-        <p>The most significant negative correlation occurred between {{cor_min_series | safe}} and {{cor_min_candidate | safe}} with the value: {{cor_min_val | safe}}</p>
-        <p>The most significant positive correlation occurred between {{cor_max_series | safe}} and {{cor_max_candidate | safe}} with the value: {{cor_max_val | safe}}</p>
-        <div class="container no-gutters d-md-flex align-items-stretch" id="gdelt_heatmap">
-          {{heatmap | safe}}
-        </div>
         <div class="container no-gutters d-md-flex align-items-stretch" id="gdelt_heatmap">
           {{radar | safe}}
+        </div>
+        <h4 class="mb-4"> Polling Results Corelation with Media Coverage </h4>
+        {{intro_heatmap | safe}}
+        <div class="container no-gutters d-md-flex align-items-stretch" id="gdelt_heatmap">
+          {{heatmap | safe}}
         </div>
         <div class="container no-gutters d-md-flex align-items-stretch" id="gdelt_heatmap">
           {{scatter | safe}}

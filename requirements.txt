@@ -26,3 +26,4 @@ libsass
 django-compressor 
 django-sass-processor
 plotly
+colour
