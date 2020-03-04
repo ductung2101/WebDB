@@ -248,15 +248,17 @@ class GDeltAnalysisPlot:
         fig = px.scatter(df, x="value", y="pct", facet_col="candidate" if is_outlets_wise else "series",
                          color="series" if is_outlets_wise else "candidate", trendline="ols", facet_col_wrap=2)
         if len(self.candidates) == 1 and len(self.series) == 1:
-            plot_title = self.candidates[0] + ' vs. ' + self.series[0]
+            plot_title = self.candidates[0] + ' vs. ' + self.series[0] + ' station'
         elif len(self.candidates) == 1:
             plot_title = self.candidates[0] + ' vs. outlets'
         elif len(self.series) == 1:
-            plot_title = 'Selected candidates vs. ' + self.series[0]
+            plot_title = 'Selected candidates vs. ' + self.series[0] + ' station'
         else:
             plot_title = 'Selected candidates vs. Selected outlets'
         fig.update_layout(
-            title=plot_title + ' plot'
+            title=plot_title,
+            xaxis_title = 'Media Coverage',
+            yaxis_title = 'Polling results (%)'
         )
         plot_div = plot(fig, output_type='div', include_plotlyjs=True)
         return plot_div
