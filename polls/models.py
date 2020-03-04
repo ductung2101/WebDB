@@ -9,6 +9,7 @@ from requests.auth import HTTPDigestAuth
 import json
 import pdb
 
+
 class Question(models.Model):
     question_text = models.CharField(max_length=200)
     pub_date = models.DateTimeField('date published')
@@ -84,6 +85,7 @@ class Poll(models.Model):
 
 
 class Media(models.Model):
+    objects = models.Manager()
     pdobjects = DataFrameManager()
     media_id = models.IntegerField()
     answer = models.CharField(max_length=200)
@@ -93,26 +95,19 @@ class Media(models.Model):
     series = models.CharField(max_length=200)
     value = models.FloatField()
     candidate = models.CharField(max_length=200)
+    state = models.CharField(max_length=100)
 
 
-''' file_path = "C:\\Users\\ndtun\\PycharmProjects\\WebDB\\WebDBSite\\polls\\corr_data.csv"
+'''
+file_path = "C:\\Users\\ndtun\\PycharmProjects\\WebDB\\WebDBSite\\polls\\corr_data.csv"
 temp = pd.read_csv(file_path, sep=',', quotechar='"')
 with open(file_path, 'r') as csv_file:
     reader = csv.reader(csv_file, delimiter=',', quotechar='"')
     header = next(reader)
-    print(header)
-    i=0
     for row in reader:
-        i+=1
-        print(i)
-        if row[0] != "id":
-            created = Media.objects.get_or_create(
-                media_id=row[0],
-                answer=row[1],
-                create_week=convertDateField(row[2]),
-                pct=row[3],
-                date=convertDateField(row[4]),
-                series=row[5],
-                value=row[6],
-                candidate=row[7],
-                )'''
+        
+        media = Media.objects.get(media_id=int(row[0]))
+        if media is not None:
+            media.state = row[3]
+            media.save()
+'''

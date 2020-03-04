@@ -1,4 +1,4 @@
-from colour import Color
+#from colour import Color
 from django.http import HttpResponse
 import datetime
 import requests
@@ -14,11 +14,12 @@ from django.shortcuts import redirect
 from django.views.generic import FormView
 from plotly.offline import plot
 
-from polls.forms import CandidatesForm, NationalForm, OutletsForm
+from .forms import CandidatesForm, NationalForm, OutletsForm
 
-from polls.data import DataLoader
-from polls.updatedb import auto_update_president_polls
-from polls.util import parse_daterange
+from .data import DataLoader
+from .updatedb import auto_update_president_polls
+from .util import parse_daterange
+
 
 class PollJSONView(BaseLineChartView):
     def post(self, request, *args, **kwargs):
