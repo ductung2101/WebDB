@@ -34,6 +34,7 @@ class PollJSONView(BaseLineChartView):
 
     def do_compute(self):
         self.candidates = self.kwargs.get('candidates').split('-')
+        self.candidates.remove("Patrick")
         self.df = DataLoader.instance().get_polls(
             self.kwargs.get('start_date'),
             self.kwargs.get('end_date'),
@@ -80,12 +81,13 @@ class CoverageJSONView(BaseLineChartView):
 
     def do_compute(self):
         self.candidates = self.kwargs.get('candidates').split('-')
+        self.candidates.remove('Patrick')
         self.series = self.kwargs.get('series').split('-')
-        self.df = DataLoader.instance().get_media(
+        self.df = DataLoader.instance().get_media_influence(
             self.kwargs.get('start_date'),
             self.kwargs.get('end_date'),
             self.candidates,
-            self.series
+            self.series,
         ).round({'value': 2})
 
         self.df_pivot = self.df.pivot_table(
@@ -127,7 +129,7 @@ class GDeltAnalysisPlot:
             self.series = selected_series
         print("Rendering for series", self.series)
 
-        self.date_filtered_df = DataLoader.instance().get_media(
+        self.date_filtered_df = DataLoader.instance().get_media_influence(
             start_date, end_date, self.candidates, self.series).round({'pct': 2, 'value': 2})
 
         self.min_cor = 2
@@ -275,7 +277,7 @@ def overview_table(start_date, end_date, state, candidates, series):
     }
     return_dict = {}
     dfp = DataLoader.instance().get_polls(start_date, end_date, candidates, state)
-    dfc = DataLoader.instance().get_media(start_date, end_date, candidates, series)
+    dfc = DataLoader.instance().get_media_influence(start_date, end_date, candidates, series, state)
     dfp_fst_date = dfp[dfp.start_date == dfp.start_date.min()][["answer", "pct"]]
     dfp_lst_date = dfp[dfp.start_date == dfp.start_date.max()][["answer", "pct"]]
     dfp_date_merged = pd.merge(dfp_fst_date, dfp_lst_date, on = 'answer')
@@ -286,6 +288,7 @@ def overview_table(start_date, end_date, state, candidates, series):
     dfc_date_merged = pd.merge(dfc_fst_date, dfc_lst_date, on='answer')
     dfc_date_merged['cov_growth'] = dfc_date_merged['value_y'] - dfc_date_merged['value_x']
     dfc_date_merged = dfc_date_merged['cov_growth']
+    print("TUTAJ?!")
     print(dfc_date_merged)
     df_agg = dfc.groupby("answer").mean()
     df_agg["pct"] = dfp.groupby("answer")["pct"].mean()
