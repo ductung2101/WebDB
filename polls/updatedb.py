@@ -2,8 +2,8 @@ import requests
 import pandas as pd
 import csv
 
-from polls.models import Poll, Media
-from polls.util import convertDateField, convertingdatetimefield
+from .models import Poll, Media
+from .util import convertDateField, convertingdatetimefield
 
 # auto update poll using requests
 def auto_update_president_polls():

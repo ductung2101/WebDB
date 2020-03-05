@@ -5,8 +5,8 @@ import numpy as np
 from bootstrap_select import BootstrapSelect
 from django_select2.forms import Select2MultipleWidget, Select2Widget
 
-from polls.models import Poll, Media
-from polls.data import DataLoader
+from .models import Poll, Media
+from .data import DataLoader
 
 # DataLoader()
 CANDIDATES=list(zip(DataLoader.instance().get_candidate_list(),
