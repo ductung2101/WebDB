@@ -36,13 +36,14 @@ class DataLoader:
         # self.__media["date"] = self.__media["date"].dt.strftime("%Y-%m-%d")
 
         # load polls data
+
         self.__polls = Poll.pdobjects.all().to_dataframe()
         self.__polls["pct"] = self.__polls["pct"].astype(float)
         self.__polls["create_date"] = pd.to_datetime(self.__polls["created_at"],
                                                      infer_datetime_format=True)
         self.__polls["create_week"] = (self.__polls['create_date'] - \
                                        pd.to_timedelta(self.__polls['create_date'].dt.dayofweek, \
-                                                       unit='d') - np.timedelta64(1, 'D')) \
+                                                       unit='d') + np.timedelta64(7, 'D')).dt.normalize() \
             .dt.normalize().dt.strftime("%Y-%m-%d")
         # subset this, temporarily
         self.__polls = self.__polls[self.__polls["party"] == "DEM"]
@@ -76,7 +77,7 @@ class DataLoader:
                     '''
         self.__media_influence = pd.read_sql_query(qry_statewise, conn)
         self.__media_influence_national = pd.read_sql_query(qry_national, conn)
-
+        
     def get_polls(self, start_date=None, end_date=None, candidates=None,
                   state=None):
         df = self.__polls
@@ -122,7 +123,7 @@ class DataLoader:
 
     # helper functions
     def get_candidate_list(self):
-        return self.__media_influence['candidate'].unique()
+        return self.__media['candidate'].unique()
 
     def get_outlets_list(self):
-        return self.__media_influence['series'].unique()
+        return self.__media['series'].unique()

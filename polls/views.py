@@ -33,15 +33,13 @@ class PollJSONView(BaseLineChartView):
                         candidates=candidates, state=state)
 
     def do_compute(self):
-        self.candidates = self.kwargs.get('candidates').split('-')
-        self.candidates.remove("Patrick")
         self.df = DataLoader.instance().get_polls(
             self.kwargs.get('start_date'),
             self.kwargs.get('end_date'),
-            self.candidates,
+            self.kwargs.get('candidates').split('-'),
             self.kwargs.get('state'),
         )
-
+        self.candidates = self.df["answer"].unique()
         self.df_pivot = self.df.pivot_table(
             values="pct", index="create_week", columns="answer",
             aggfunc=np.mean).fillna(0)
@@ -80,16 +78,14 @@ class CoverageJSONView(BaseLineChartView):
                         candidates=candidates, series=outlets)
 
     def do_compute(self):
-        self.candidates = self.kwargs.get('candidates').split('-')
-        self.candidates.remove('Patrick')
         self.series = self.kwargs.get('series').split('-')
         self.df = DataLoader.instance().get_media_influence(
             self.kwargs.get('start_date'),
             self.kwargs.get('end_date'),
-            self.candidates,
+            self.kwargs.get('candidates').split('-'),
             self.series,
         ).round({'value': 2})
-
+        self.candidates = self.df["answer"].unique()
         self.df_pivot = self.df.pivot_table(
             values="value", index="create_week", columns="answer",
             aggfunc=np.mean).fillna(0).round(2)
@@ -276,8 +272,12 @@ def overview_table(start_date, end_date, state, candidates, series):
         'poll_growth' : 'Polling Growth (p.p.)'
     }
     return_dict = {}
+    print("TUTAJ!")
+    #print(candidates)
     dfp = DataLoader.instance().get_polls(start_date, end_date, candidates, state)
+    #print(dfp["answer"].unique())
     dfc = DataLoader.instance().get_media_influence(start_date, end_date, candidates, series, state)
+    #print(dfc["candidate"].unique())
     dfp_fst_date = dfp[dfp.start_date == dfp.start_date.min()][["answer", "pct"]]
     dfp_lst_date = dfp[dfp.start_date == dfp.start_date.max()][["answer", "pct"]]
     dfp_date_merged = pd.merge(dfp_fst_date, dfp_lst_date, on = 'answer')
@@ -288,14 +288,14 @@ def overview_table(start_date, end_date, state, candidates, series):
     dfc_date_merged = pd.merge(dfc_fst_date, dfc_lst_date, on='answer')
     dfc_date_merged['cov_growth'] = dfc_date_merged['value_y'] - dfc_date_merged['value_x']
     dfc_date_merged = dfc_date_merged['cov_growth']
-    print("TUTAJ?!")
-    print(dfc_date_merged)
+    print(dfp_date_merged)
     df_agg = dfc.groupby("answer").mean()
     df_agg["pct"] = dfp.groupby("answer")["pct"].mean()
     df_agg = pd.merge(df_agg, dfp_date_merged, on='answer')
     df_agg = pd.merge(df_agg, dfc_date_merged, on='answer')
     df_agg = df_agg.reset_index()[cols_dict.keys()]
     df_agg = df_agg.round(2)
+
     # get polling values, to display in the template.
     df_agg.sort_values(by="pct", ascending=False, inplace=True)
     return_dict["overview_pct_leader"] = df_agg.iloc[0]["answer"]
