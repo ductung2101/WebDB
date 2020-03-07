@@ -269,16 +269,29 @@ def overview_table(start_date, end_date, state, candidates, series):
     cols_dict = {
         'answer': 'Candidate',
         'value': 'Coverage Average (%)',
-        # 'cov_growth' : 'Coverage Growth (p.p.)',
+        'cov_growth' : 'Coverage Growth (p.p.)',
         'pct': 'Polling Average (%)',
-        # 'poll_growth' : 'Polling Growth (p.p.)'
+        'poll_growth' : 'Polling Growth (p.p.)'
     }
     return_dict = {}
     dfc = DataLoader.instance().get_media_influence(start_date, end_date, candidates, series, state)
     df_agg = dfc.groupby("answer").mean()
     df_agg = df_agg.fillna(0)
+
+    min_dates = dfc.sort_values("date").groupby("answer", as_index=False).first()
+    max_dates = dfc.sort_values("date", ascending=False).groupby("answer", as_index=False).first()
+    print(min_dates)
+    print(max_dates)
+    cov_growth = max_dates["value"] - min_dates["value"]
+    poll_growth = max_dates["pct"] - min_dates["pct"]
+    answer = max_dates['answer']
+    df_growth = pd.DataFrame(list(zip(answer, poll_growth, cov_growth)), columns = ['answer', 'poll_growth', 'cov_growth'])
+
+    df_agg = pd.merge(df_agg, df_growth, on='answer')
     df_agg = df_agg.reset_index()[cols_dict.keys()]
     df_agg = df_agg.round(2)
+    print(df_agg)
+
 
     # get polling values, to display in the template.
     df_agg.sort_values(by="pct", ascending=False, inplace=True)
