@@ -1,4 +1,4 @@
-#from colour import Color
+# from colour import Color
 from django.http import HttpResponse
 import datetime
 import requests
@@ -27,6 +27,8 @@ class PollJSONView(BaseLineChartView):
         start_date, end_date = parse_daterange(form["daterange"].value())
         candidates = form["candidates"].value()[0]
         state = form["state"].value()
+        if state is None or state == "":
+            state = 'National'
         if len(candidates) == 0:
             candidates = "-".join(DataLoader.instance().get_candidate_list())
         return redirect('poll_json', start_date=start_date, end_date=end_date,
@@ -111,8 +113,6 @@ class CoverageJSONView(BaseLineChartView):
 class GDeltAnalysisPlot:
     def __init__(self, start_date=None, end_date=None, state=None,
                  selected_candidates=None, selected_series=None):
-        if selected_candidates is None:
-            selected_candidates = []
         if selected_candidates is None or len(selected_candidates) == 0:
             self.candidates = DataLoader.instance().get_candidate_list()
         else:
@@ -125,8 +125,10 @@ class GDeltAnalysisPlot:
             self.series = selected_series
         print("Rendering for series", self.series)
 
+        self.state = state
+
         self.date_filtered_df = DataLoader.instance().get_media_influence(
-            start_date, end_date, self.candidates, self.series).round({'pct': 2, 'value': 2})
+            start_date, end_date, self.candidates, self.series, self.state).round({'pct': 2, 'value': 2})
 
         self.min_cor = 2
         self.min_cand = None
@@ -256,8 +258,8 @@ class GDeltAnalysisPlot:
             plot_title = 'Selected candidates vs. Selected outlets'
         fig.update_layout(
             title=plot_title,
-            xaxis_title = 'Media Coverage',
-            yaxis_title = 'Polling results (%)'
+            xaxis_title='Media Coverage',
+            yaxis_title='Polling results (%)'
         )
         plot_div = plot(fig, output_type='div', include_plotlyjs=True)
         return plot_div
@@ -267,32 +269,14 @@ def overview_table(start_date, end_date, state, candidates, series):
     cols_dict = {
         'answer': 'Candidate',
         'value': 'Coverage Average (%)',
-        'cov_growth' : 'Coverage Growth (p.p.)',
+        # 'cov_growth' : 'Coverage Growth (p.p.)',
         'pct': 'Polling Average (%)',
-        'poll_growth' : 'Polling Growth (p.p.)'
+        # 'poll_growth' : 'Polling Growth (p.p.)'
     }
     return_dict = {}
-    print("TUTAJ!")
-    #print(candidates)
-    dfp = DataLoader.instance().get_polls(start_date, end_date, candidates, state)
-    #print(dfp["answer"].unique())
     dfc = DataLoader.instance().get_media_influence(start_date, end_date, candidates, series, state)
-    #print(dfc["candidate"].unique())
-    dfp_fst_date = dfp[dfp.start_date == dfp.start_date.min()][["answer", "pct"]]
-    dfp_lst_date = dfp[dfp.start_date == dfp.start_date.max()][["answer", "pct"]]
-    dfp_date_merged = pd.merge(dfp_fst_date, dfp_lst_date, on = 'answer')
-    dfp_date_merged['poll_growth'] = dfp_date_merged['pct_y'].astype(int) - dfp_date_merged['pct_x'].astype(int)
-    dfp_date_merged = dfp_date_merged[['answer', 'poll_growth']]
-    dfc_fst_date = dfc[dfc.date == dfc.date.min()][["answer", "value"]].groupby("answer").mean()
-    dfc_lst_date = dfc[dfc.date == dfc.date.max()][["answer", "value"]].groupby("answer").mean()
-    dfc_date_merged = pd.merge(dfc_fst_date, dfc_lst_date, on='answer')
-    dfc_date_merged['cov_growth'] = dfc_date_merged['value_y'] - dfc_date_merged['value_x']
-    dfc_date_merged = dfc_date_merged['cov_growth']
-    print(dfp_date_merged)
     df_agg = dfc.groupby("answer").mean()
-    df_agg["pct"] = dfp.groupby("answer")["pct"].mean()
-    df_agg = pd.merge(df_agg, dfp_date_merged, on='answer')
-    df_agg = pd.merge(df_agg, dfc_date_merged, on='answer')
+    df_agg = df_agg.fillna(0)
     df_agg = df_agg.reset_index()[cols_dict.keys()]
     df_agg = df_agg.round(2)
 
@@ -300,8 +284,8 @@ def overview_table(start_date, end_date, state, candidates, series):
     df_agg.sort_values(by="pct", ascending=False, inplace=True)
     return_dict["overview_pct_leader"] = df_agg.iloc[0]["answer"]
     return_dict["overview_pct_runnerup"] = df_agg.iloc[1]["answer"] if len(df_agg) > 1 else ''
-    return_dict["overview_pct_leaderv"] = str(df_agg.iloc[0]["pct"])+'%'
-    return_dict["overview_pct_runnerupv"] = str(df_agg.iloc[1]["pct"])+'%' if len(df_agg) > 1 else ''
+    return_dict["overview_pct_leaderv"] = str(df_agg.iloc[0]["pct"]) + '%'
+    return_dict["overview_pct_runnerupv"] = str(df_agg.iloc[1]["pct"]) + '%' if len(df_agg) > 1 else ''
 
     if len(df_agg) > 1:
         return_dict["intro_1"] = 'The average polling leader over the highlighted period is '
@@ -363,13 +347,21 @@ class MainPageView(FormView):
             outlets = None
 
         plot_data = GDeltAnalysisPlot(start_date, end_date, state, candidates, outlets)
+        if plot_data.min_cand is None:
+            redirect('polls/main_page')
+            context['error'] = "<p>Sorry, no data matches the selected filtering</p>"
+            return context
 
-        # make heatmap
+            # make heatmap
         context['heatmap'] = plot_data.make_heatmap()
         if (candidates is None or len(candidates) != 1) or (outlets is None or len(outlets) != 1):
-            context['intro_heatmap'] = '<p>The most significant negative correlation occurred between ' + plot_data.min_ser + ' and ' + plot_data.min_cand + ' with the value: ' + str(plot_data.min_cor) + '</p><p>The most significant positive correlation occurred between ' + plot_data.max_ser + ' and ' + plot_data.max_cand + ' with the value: '+ str(plot_data.max_cor) +'</p>'
+            context[
+                'intro_heatmap'] = '<p>The most significant negative correlation occurred between ' + plot_data.min_ser + ' and ' + plot_data.min_cand + ' with the value: ' + str(
+                plot_data.min_cor) + '</p><p>The most significant positive correlation occurred between ' + plot_data.max_ser + ' and ' + plot_data.max_cand + ' with the value: ' + str(
+                plot_data.max_cor) + '</p>'
         else:
-            context['intro_heatmap'] = '<p>The correlation between ' + candidates[0] + ' and ' + outlets[0] + ' is ' + str(plot_data.max_cor)
+            context['intro_heatmap'] = '<p>The correlation between ' + candidates[0] + ' and ' + outlets[
+                0] + ' is ' + str(plot_data.max_cor)
         # make radar
         context['radar'] = plot_data.make_radar_chart()
 
@@ -391,8 +383,10 @@ class MainPageView(FormView):
         context['outlets_num'] = 0 if outlets is None else len(outlets)
 
         # get data for the overview table
+        context['table_intro'] = "<p>The following table shows statistics computed across the selected time period.</p>"
         context.update(overview_table(start_date, end_date, state, candidates, outlets))
 
+        context['plots_header'] = "Polling Results Corelation with Media Coverage"
 
         return context
 

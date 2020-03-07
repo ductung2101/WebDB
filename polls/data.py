@@ -77,7 +77,7 @@ class DataLoader:
                     '''
         self.__media_influence = pd.read_sql_query(qry_statewise, conn)
         self.__media_influence_national = pd.read_sql_query(qry_national, conn)
-        
+
     def get_polls(self, start_date=None, end_date=None, candidates=None,
                   state=None):
         df = self.__polls
@@ -106,7 +106,7 @@ class DataLoader:
 
     def get_media_influence(self, start_date=None, end_date=None, candidates=None,
                             series=None, state=None):
-        if state is not None and state != "National":
+        if state is not None and state != "National" and state != "":
             df = self.__media_influence
             df = df[df["state"] == state]
         else:
