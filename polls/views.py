@@ -62,7 +62,7 @@ class PollJSONView(BaseLineChartView):
         can_selected = self.get_providers()
         lst_selected = []
         for can in can_selected:
-            lst_selected.append(list(self.df_pivot[can]))
+            lst_selected.append(list(self.df_pivot[can].round(2)))
         return lst_selected
 
 
