@@ -24,7 +24,7 @@ class NationalForm(forms.Form):
     # date range
     daterange = forms.CharField(
         label='Date Range', 
-        initial='01.04.2019 - 01.08.2019',
+        initial='01.01.2020 - 01.03.2020',
         widget=forms.TextInput(
             attrs={'class': 'form-control'}
         )
@@ -32,6 +32,8 @@ class NationalForm(forms.Form):
     candidates = forms.MultipleChoiceField(
         choices=CANDIDATES,
         required = False,
+        # initial = DataLoader.instance().get_initial_candidates(),
+        initial = DataLoader.instance().get_initial_candidates(),
         widget = Select2MultipleWidget(
             attrs={'class': 'form-control'}
         )
@@ -41,7 +43,8 @@ class NationalForm(forms.Form):
         required = False,
         widget = Select2MultipleWidget(
             attrs={'class': 'form-control'}
-        )
+        ),
+        initial = DataLoader.instance().get_outlets_list()
     )
     state = forms.ChoiceField(
         choices=STATES,
@@ -56,7 +59,7 @@ class CandidatesForm(forms.Form):
     # date range
     daterange = forms.CharField(
         label='Date Range', 
-        initial='01.04.2019 - 01.08.2019',
+        initial='01.01.2020 - 01.03.2020',
         widget=forms.TextInput(
             attrs={'class': 'form-control'}
         )
@@ -64,6 +67,7 @@ class CandidatesForm(forms.Form):
     candidates = forms.ChoiceField(
         choices=CANDIDATES,
         required = False,
+        initial = DataLoader.instance().get_initial_candidates(),
         widget = Select2Widget(
             attrs={'class': 'form-control'}
         )
@@ -71,6 +75,7 @@ class CandidatesForm(forms.Form):
     outlets = forms.MultipleChoiceField(
         choices=OUTLETS,
         required = False,
+        initial = DataLoader.instance().get_outlets_list(),
         widget = Select2MultipleWidget(
             attrs={'class': 'form-control'}
         )
@@ -88,7 +93,7 @@ class OutletsForm(forms.Form):
     # date range
     daterange = forms.CharField(
         label='Date Range', 
-        initial='01.04.2019 - 01.08.2019',
+        initial='01.01.2020 - 01.03.2020',
         widget=forms.TextInput(
             attrs={'class': 'form-control'}
         )
@@ -96,6 +101,7 @@ class OutletsForm(forms.Form):
     candidates = forms.MultipleChoiceField(
         choices=CANDIDATES,
         required = False,
+        initial = DataLoader.instance().get_initial_candidates(),
         widget = Select2MultipleWidget(
             attrs={'class': 'form-control'}
         )
@@ -103,6 +109,7 @@ class OutletsForm(forms.Form):
     outlets = forms.ChoiceField(
         choices=OUTLETS,
         required = False,
+        initial = DataLoader.instance().get_outlets_list(),
         widget = Select2Widget(
             attrs={'class': 'form-control'}
         )

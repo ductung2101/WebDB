@@ -123,7 +123,10 @@ class DataLoader:
 
     # helper functions
     def get_candidate_list(self):
-        return self.__media['candidate'].unique()
+        return list(self.__media['candidate'].unique())
+
+    def get_initial_candidates(self):
+        return ["Biden", "Sanders"]
 
     def get_outlets_list(self):
-        return self.__media['series'].unique()
+        return list(self.__media['series'].unique())

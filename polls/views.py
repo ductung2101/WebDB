@@ -41,7 +41,7 @@ class PollJSONView(BaseLineChartView):
             self.kwargs.get('candidates').split('-'),
             self.kwargs.get('state'),
         )
-        self.candidates = self.df["answer"].unique()
+        self.candidates = np.sort(self.df["answer"].unique())
         self.df_pivot = self.df.pivot_table(
             values="pct", index="create_week", columns="answer",
             aggfunc=np.mean).fillna(0)
@@ -87,7 +87,7 @@ class CoverageJSONView(BaseLineChartView):
             self.kwargs.get('candidates').split('-'),
             self.series,
         ).round({'value': 2})
-        self.candidates = self.df["answer"].unique()
+        self.candidates = np.sort(self.df["answer"].unique())
         self.df_pivot = self.df.pivot_table(
             values="value", index="create_week", columns="answer",
             aggfunc=np.mean).fillna(0).round(2)
