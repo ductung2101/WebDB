@@ -8,6 +8,8 @@ polling results.
 
 This project is inspired by [Nate Silver's fivethirtyeight](fivethirtyeight.com) platform. 
 
+The final presentation is attached in the main folder.
+
 ## How to run the project.
 ### Prerequisites:
 
