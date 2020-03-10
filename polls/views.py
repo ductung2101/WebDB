@@ -117,13 +117,13 @@ class GDeltAnalysisPlot:
             self.candidates = DataLoader.instance().get_candidate_list()
         else:
             self.candidates = selected_candidates
-        print("Rendering for candidates", self.candidates, "from query", selected_candidates)
+        # print("Rendering for candidates", self.candidates, "from query", selected_candidates)
 
         if selected_series is None or len(selected_series) == 0:
             self.series = DataLoader.instance().get_outlets_list()
         else:
             self.series = selected_series
-        print("Rendering for series", self.series)
+        # print("Rendering for series", self.series)
 
         self.state = state
 
@@ -280,8 +280,8 @@ def overview_table(start_date, end_date, state, candidates, series):
 
     min_dates = dfc.sort_values("date").groupby("answer", as_index=False).first()
     max_dates = dfc.sort_values("date", ascending=False).groupby("answer", as_index=False).first()
-    print(min_dates)
-    print(max_dates)
+    # print(min_dates)
+    # print(max_dates)
     cov_growth = max_dates["value"] - min_dates["value"]
     poll_growth = max_dates["pct"] - min_dates["pct"]
     answer = max_dates['answer']
@@ -290,7 +290,7 @@ def overview_table(start_date, end_date, state, candidates, series):
     df_agg = pd.merge(df_agg, df_growth, on='answer')
     df_agg = df_agg.reset_index()[cols_dict.keys()]
     df_agg = df_agg.round(2)
-    print(df_agg)
+    # print(df_agg)
 
 
     # get polling values, to display in the template.
@@ -349,7 +349,7 @@ class MainPageView(FormView):
 
         # get the elements from the form
         form = super().get_form()
-        print(form["candidates"].value())
+        # print(form["candidates"].value())
         start_date, end_date = parse_daterange(form["daterange"].value())
         candidates = form["candidates"].value()
         outlets = form["outlets"].value()
@@ -425,7 +425,10 @@ class CandidatePageView(FormView):
         return super().get(form)
 
 
-# auto_update_president_polls()
+#specify update time, preset on Monday between 23-24
+if (datetime.datetime.today().weekday() == 0) and (datetime.datetime.now().hour == 23):
+    auto_update_president_polls()
+
 main_page = MainPageView.as_view()
 candidate = CandidatePageView.as_view()
 poll_json_view = PollJSONView.as_view()
